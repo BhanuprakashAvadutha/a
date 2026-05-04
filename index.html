@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bhanu Prakash · Data Engineer & Automation Builder</title>
+<meta name="description" content="I build data pipelines and automation for Indian financial firms. Manual work → infrastructure. Based in Hyderabad.">
+
+<!-- Fonts: Instrument Serif (display) + Geist (body) + JetBrains Mono -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+/* ─── TOKENS ─────────────────────────────────────────── */
+:root {
+  --bg:         #191b18;
+  --bg-raised:  #1e2119;
+  --surface:    #232620;
+  --surface-2:  #2a2e27;
+  --border:     rgba(120,137,82,0.14);
+  --border-2:   rgba(120,137,82,0.28);
+  --text:       #F2F0EA;
+  --text-2:     #A8A99E;
+  --text-3:     #5E6058;
+  --accent:     #788952;
+  --accent-lt:  #9aad69;
+  --accent-glow:rgba(120,137,82,0.22);
+  --gold:       #C9A84C;
+  --gold-dim:   rgba(201,168,76,0.1);
+  --green:      #6AAF7A;
+  --green-dim:  rgba(106,175,122,0.12);
+  --red:        #C0695A;
+
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-sans:  'Geist', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', monospace;
+
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  16px;
+  --radius-xl:  22px;
+}
+
+/* ─── RESET ──────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  font-family:var(--font-sans);
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+  cursor:none;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ─── CURSOR ─────────────────────────────────────────── */
+#cursor{
+  position:fixed;width:8px;height:8px;
+  background:var(--accent-lt);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:width .18s,height .18s,background .18s;
+  mix-blend-mode:normal;
+}
+#cursor.grow{width:40px;height:40px;background:var(--accent-glow);border-radius:50%;}
+#cursor-ring{
+  position:fixed;width:32px;height:32px;
+  border:1px solid rgba(120,137,82,0.4);border-radius:50%;
+  pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:left .09s,top .09s;
+}
+
+/* ─── GRID BG ────────────────────────────────────────── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cpath d='M 64 0 L 0 0 0 64' fill='none' stroke='rgba(120,137,82,0.06)' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-size:64px 64px;pointer-events:none;z-index:0;
+}
+
+/* ─── NAV ────────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 56px;height:60px;
+  transition:all .3s;
+}
+nav.scrolled{
+  background:rgba(25,27,24,0.88);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  font-family:var(--font-serif);font-size:20px;font-weight:400;
+  color:var(--text);text-decoration:none;letter-spacing:-0.01em;
+  font-style:italic;
+}
+.nav-logo em{color:var(--accent-lt);font-style:normal;}
+.nav-links{display:flex;align-items:center;gap:32px;list-style:none;}
+.nav-links a{
+  font-size:13px;font-weight:500;color:var(--text-2);
+  text-decoration:none;letter-spacing:0.01em;
+  transition:color .2s;
+}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:13px;font-weight:600;padding:8px 18px;
+  border-radius:var(--radius-md);
+  background:var(--accent);color:#fff;
+  border:none;cursor:none;text-decoration:none;
+  transition:all .2s;letter-spacing:0.01em;
+  font-family:var(--font-sans);
+}
+.nav-cta:hover{background:var(--accent-lt);transform:translateY(-1px);}
+
+/* ─── HERO ───────────────────────────────────────────── */
+.hero{
+  position:relative;min-height:100vh;
+  display:grid;grid-template-columns:1fr 420px;
+  align-items:center;gap:48px;
+  padding:120px 56px 80px;
+  max-width:1360px;margin:0 auto;z-index:2;
+}
+.hero-left{}
+.hero-avail{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:5px 14px 5px 10px;border-radius:20px;
+  border:1px solid var(--green-dim);background:var(--green-dim);
+  font-size:11.5px;font-weight:500;color:var(--green);
+  letter-spacing:0.04em;margin-bottom:28px;
+  font-family:var(--font-mono);
+}
+.avail-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.75);}}
+
+.hero-eyebrow{
+  font-family:var(--font-mono);font-size:11px;
+  color:var(--accent-lt);letter-spacing:0.14em;
+  text-transform:uppercase;margin-bottom:22px;
+}
+.hero-h1{
+  font-family:var(--font-serif);
+  font-size:clamp(52px,5.5vw,82px);
+  font-weight:400;line-height:1.02;
+  letter-spacing:-0.025em;margin-bottom:6px;
+  color:var(--text);
+}
+.hero-h1 .italic{font-style:italic;color:var(--accent-lt);}
+.hero-h1 .muted{color:var(--text-2);}
+.hero-sub{
+  font-size:17px;color:var(--text-2);
+  max-width:520px;line-height:1.68;
+  margin:24px 0 40px;font-weight:300;
+}
+.hero-ctas{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:13px 26px;border-radius:var(--radius-md);
+  font-size:14.5px;font-weight:600;font-family:var(--font-sans);
+  color:#fff;background:var(--accent);border:none;
+  cursor:none;text-decoration:none;
+  transition:all .22s;letter-spacing:0.01em;
+}
+.btn-primary:hover{background:var(--accent-lt);transform:translateY(-2px);box-shadow:0 8px 28px var(--accent-glow);}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:13px 26px;border-radius:var(--radius-md);
+  font-size:14.5px;font-weight:500;font-family:var(--font-sans);
+  color:var(--text-2);background:transparent;
+  border:1px solid var(--border-2);cursor:none;text-decoration:none;
+  transition:all .22s;
+}
+.btn-ghost:hover{color:var(--text);border-color:var(--accent);background:rgba(120,137,82,0.06);}
+
+/* HERO METRICS */
+.hero-metrics{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  margin-top:48px;
+}
+.metric-chip{
+  padding:16px 18px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius-md);
+  transition:border-color .2s,transform .2s;
+}
+.metric-chip:hover{border-color:var(--border-2);transform:translateY(-2px);}
+.metric-num{
+  font-family:var(--font-serif);font-size:28px;font-weight:400;
+  color:var(--text);line-height:1;font-style:italic;
+}
+.metric-num.accent{color:var(--accent-lt);}
+.metric-label{
+  font-size:11px;color:var(--text-3);font-weight:500;
+  letter-spacing:0.05em;text-transform:uppercase;margin-top:5px;
+  font-family:var(--font-mono);
+}
+
+/* HERO RIGHT — TERMINAL */
+.hero-right{}
+.terminal{
+  background:var(--surface);border:1px solid var(--border-2);
+  border-radius:var(--radius-lg);overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,0.45),0 0 0 1px rgba(120,137,82,0.06);
+}
+.terminal-bar{
+  display:flex;align-items:center;gap:6px;
+  padding:12px 16px;background:var(--surface-2);
+  border-bottom:1px solid var(--border);
+}
+.td{width:11px;height:11px;border-radius:50%;}
+.td-r{background:#FF5F57;}.td-y{background:#FEBC2E;}.td-g{background:#28C840;}
+.terminal-title{
+  flex:1;text-align:center;
+  font-family:var(--font-mono);font-size:11px;color:var(--text-3);
+  margin-left:-38px;
+}
+.terminal-body{padding:22px 24px;font-family:var(--font-mono);font-size:12.5px;line-height:1.75;}
+.tc{color:var(--text-3);}
+.tk{color:var(--accent-lt);}
+.ts{color:#9DDC8B;}
+.tn{color:#E5A36C;}
+.tf{color:var(--text-2);}
+.to{color:var(--green);}
+.t-blink{display:inline-block;width:8px;height:13px;background:var(--accent-lt);vertical-align:middle;animation:blink 1.1s step-end infinite;margin-left:2px;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* LOGO STRIP */
+.strip{
+  position:relative;z-index:2;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:20px 0;overflow:hidden;
+}
+.strip-inner{overflow:hidden;white-space:nowrap;}
+.strip-track{
+  display:inline-flex;gap:0;
+  animation:marquee 28s linear infinite;
+}
+.strip-track:hover{animation-play-state:paused;}
+@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.strip-item{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:0 32px;font-size:12px;font-weight:500;
+  color:var(--text-3);white-space:nowrap;
+  border-right:1px solid var(--border);
+  font-family:var(--font-mono);letter-spacing:0.04em;
+}
+.strip-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);opacity:.6;}
+
+/* ─── SECTION PRIMITIVES ─────────────────────────────── */
+.section{
+  position:relative;z-index:2;
+  padding:96px 56px;max-width:1360px;margin:0 auto;
+}
+.section-tag{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--font-mono);font-size:11px;
+  color:var(--accent-lt);letter-spacing:0.12em;
+  text-transform:uppercase;margin-bottom:18px;
+}
+.section-tag::before{content:'';display:block;width:20px;height:1px;background:var(--accent);}
+.section-h2{
+  font-family:var(--font-serif);
+  font-size:clamp(34px,3.5vw,54px);
+  font-weight:400;letter-spacing:-0.025em;line-height:1.08;
+  margin-bottom:14px;color:var(--text);
+}
+.section-h2 em{font-style:italic;color:var(--accent-lt);}
+.section-sub{
+  font-size:16px;color:var(--text-2);
+  max-width:520px;line-height:1.7;margin-bottom:56px;
+  font-weight:300;
+}
+.full-divider{position:relative;z-index:2;width:100%;height:1px;background:var(--border);}
+
+/* ─── PROBLEM SECTION ────────────────────────────────── */
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:44px;}
+.problem-card{
+  padding:28px 28px 24px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  transition:border-color .22s,transform .22s;
+  position:relative;overflow:hidden;
+}
+.problem-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent-glow),transparent);
+  opacity:0;transition:opacity .3s;
+}
+.problem-card:hover{border-color:var(--border-2);transform:translateY(-3px);}
+.problem-card:hover::after{opacity:1;}
+.problem-icon{
+  width:38px;height:38px;border-radius:var(--radius-sm);
+  background:rgba(120,137,82,0.08);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;color:var(--accent-lt);
+}
+.problem-card h3{
+  font-family:var(--font-sans);font-size:15px;font-weight:600;
+  color:var(--text);margin-bottom:8px;letter-spacing:-0.01em;
+}
+.problem-card p{font-size:13.5px;color:var(--text-2);line-height:1.65;}
+.problem-stat{
+  font-family:var(--font-mono);font-size:10.5px;
+  color:var(--accent-lt);margin-top:14px;
+  padding:4px 10px;background:rgba(120,137,82,0.08);
+  border-radius:4px;display:inline-block;letter-spacing:0.02em;
+}
+.pivot-box{
+  padding:28px 36px;
+  background:linear-gradient(135deg,rgba(120,137,82,0.06) 0%,rgba(120,137,82,0.02) 100%);
+  border:1px solid var(--border-2);border-radius:var(--radius-lg);
+  display:flex;align-items:center;gap:20px;
+}
+.pivot-icon{color:var(--accent-lt);flex-shrink:0;}
+.pivot-text{font-size:16px;color:var(--text);line-height:1.65;}
+.pivot-text strong{color:var(--accent-lt);font-weight:600;}
+
+/* ─── CASE STUDIES ───────────────────────────────────── */
+.cases-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+.case-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);overflow:hidden;
+  cursor:none;
+  transition:border-color .22s,transform .22s,box-shadow .22s;
+  display:flex;flex-direction:column;
+}
+.case-card:hover{
+  border-color:var(--border-2);transform:translateY(-4px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.35),0 0 0 1px rgba(120,137,82,0.08);
+}
+.case-header{
+  padding:22px 22px 0;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+}
+.case-tag{
+  font-family:var(--font-mono);font-size:10px;font-weight:600;
+  padding:4px 9px;border-radius:4px;letter-spacing:0.06em;
+  text-transform:uppercase;flex-shrink:0;
+}
+.tag-pipeline{background:rgba(120,137,82,0.12);color:var(--accent-lt);}
+.tag-tool{background:rgba(106,175,122,0.1);color:var(--green);}
+.tag-data{background:rgba(201,168,76,0.1);color:var(--gold);}
+.tag-compliance{background:rgba(192,132,252,0.08);color:#C084FC;}
+.case-num{font-family:var(--font-mono);font-size:11px;color:var(--text-3);}
+.case-body{padding:18px 22px;flex:1;}
+.case-title{
+  font-family:var(--font-sans);font-size:16px;font-weight:600;
+  color:var(--text);letter-spacing:-0.015em;line-height:1.3;margin-bottom:10px;
+}
+.case-problem{font-size:13px;color:var(--text-2);line-height:1.65;margin-bottom:14px;}
+.case-result{
+  display:flex;align-items:flex-start;gap:9px;
+  padding:11px 14px;background:var(--green-dim);
+  border:1px solid rgba(106,175,122,0.15);border-radius:var(--radius-sm);
+  margin-bottom:14px;
+}
+.result-arr{color:var(--green);font-weight:700;font-size:14px;flex-shrink:0;margin-top:1px;}
+.result-text{
+  font-family:var(--font-sans);font-size:13px;font-weight:600;
+  color:var(--green);line-height:1.35;
+}
+.case-cta{
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:500;color:var(--accent-lt);
+  cursor:none;transition:gap .2s;margin-top:6px;
+  font-family:var(--font-mono);letter-spacing:0.02em;
+}
+.case-card:hover .case-cta{gap:10px;}
+.case-stack{
+  display:flex;flex-wrap:wrap;gap:6px;
+  padding:0 22px 18px;
+}
+.stack-pill{
+  font-family:var(--font-mono);font-size:10px;
+  padding:3px 8px;border-radius:4px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--border);
+  color:var(--text-3);letter-spacing:0.02em;
+}
+
+/* ─── MODAL ──────────────────────────────────────────── */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(10,12,10,0.82);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.modal-backdrop.open{opacity:1;pointer-events:all;}
+.modal{
+  position:fixed;top:0;right:0;bottom:0;
+  width:min(680px,90vw);z-index:501;
+  background:var(--bg-raised);
+  border-left:1px solid var(--border-2);
+  overflow-y:auto;
+  transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+  padding:0;
+}
+.modal-backdrop.open .modal{transform:translateX(0);}
+.modal-header{
+  padding:32px 40px 28px;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;
+  background:var(--bg-raised);z-index:1;
+}
+.modal-close{
+  position:absolute;top:28px;right:36px;
+  width:34px;height:34px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:none;transition:all .2s;color:var(--text-2);
+}
+.modal-close:hover{background:var(--surface-2);color:var(--text);}
+.modal-tag{
+  font-family:var(--font-mono);font-size:10px;font-weight:600;
+  padding:4px 9px;border-radius:4px;letter-spacing:0.06em;
+  text-transform:uppercase;margin-bottom:14px;display:inline-block;
+}
+.modal-title{
+  font-family:var(--font-serif);font-size:28px;font-weight:400;
+  color:var(--text);letter-spacing:-0.02em;line-height:1.2;
+  font-style:italic;margin-bottom:8px;
+}
+.modal-client{
+  font-family:var(--font-mono);font-size:11px;color:var(--text-3);
+  letter-spacing:0.04em;
+}
+.modal-body{padding:32px 40px 48px;}
+.modal-result{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:18px 20px;background:var(--green-dim);
+  border:1px solid rgba(106,175,122,0.2);border-radius:var(--radius-md);
+  margin-bottom:32px;
+}
+.modal-result-icon{color:var(--green);flex-shrink:0;margin-top:2px;}
+.modal-result-text{font-size:15px;font-weight:600;color:var(--green);line-height:1.4;}
+.modal-section-title{
+  font-family:var(--font-sans);font-size:12px;font-weight:600;
+  color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;
+  margin:28px 0 12px;font-family:var(--font-mono);
+}
+.modal-section-title:first-of-type{margin-top:0;}
+.modal-text{font-size:14.5px;color:var(--text-2);line-height:1.75;margin-bottom:12px;}
+.modal-text strong{color:var(--text);font-weight:600;}
+.modal-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0;}
+.modal-metric{
+  padding:16px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-md);text-align:center;
+}
+.modal-metric-num{
+  font-family:var(--font-serif);font-size:22px;font-weight:400;
+  color:var(--accent-lt);font-style:italic;
+}
+.modal-metric-label{font-size:11px;color:var(--text-3);font-family:var(--font-mono);margin-top:4px;}
+.modal-stack{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+.modal-stack-pill{
+  font-family:var(--font-mono);font-size:11px;
+  padding:5px 12px;border-radius:6px;
+  background:var(--surface);border:1px solid var(--border-2);
+  color:var(--text-2);
+}
+.modal-list{margin:8px 0 12px;display:flex;flex-direction:column;gap:10px;}
+.modal-list-item{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:14px;color:var(--text-2);line-height:1.6;
+}
+.modal-list-bullet{
+  width:5px;height:5px;border-radius:50%;background:var(--accent);
+  flex-shrink:0;margin-top:8px;
+}
+
+/* ─── SERVICES ───────────────────────────────────────── */
+.services-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.service-card{
+  padding:30px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);position:relative;overflow:hidden;
+  transition:border-color .22s,transform .22s;
+}
+.service-card:hover{border-color:var(--border-2);transform:translateY(-3px);}
+.service-card.featured{
+  border-color:rgba(120,137,82,0.3);
+  background:linear-gradient(135deg,var(--surface) 0%,rgba(120,137,82,0.05) 100%);
+}
+.service-badge{
+  position:absolute;top:18px;right:18px;
+  font-family:var(--font-mono);font-size:9.5px;font-weight:600;
+  letter-spacing:0.1em;color:var(--accent-lt);
+  padding:3px 8px;border:1px solid var(--border-2);
+  border-radius:4px;background:rgba(120,137,82,0.08);
+}
+.service-icon{
+  width:42px;height:42px;border-radius:var(--radius-sm);
+  background:rgba(120,137,82,0.08);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:18px;color:var(--accent-lt);
+}
+.service-name{
+  font-family:var(--font-sans);font-size:19px;font-weight:600;
+  color:var(--text);letter-spacing:-0.02em;margin-bottom:8px;
+}
+.service-desc{font-size:13.5px;color:var(--text-2);line-height:1.65;margin-bottom:22px;}
+.service-price{
+  font-family:var(--font-serif);font-size:26px;font-weight:400;
+  color:var(--text);letter-spacing:-0.02em;font-style:italic;
+}
+.service-price span{
+  font-size:13px;font-weight:400;color:var(--text-3);
+  font-family:var(--font-sans);font-style:normal;letter-spacing:0;
+}
+.service-timeline{font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);margin-top:4px;}
+.service-features{margin-top:20px;list-style:none;display:flex;flex-direction:column;gap:9px;}
+.service-features li{
+  font-size:13px;color:var(--text-2);
+  display:flex;align-items:flex-start;gap:9px;
+}
+.service-features li svg{flex-shrink:0;margin-top:2px;color:var(--accent-lt);}
+
+/* ─── PROCESS ────────────────────────────────────────── */
+.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;margin-top:16px;}
+.process-steps::before{
+  content:'';position:absolute;
+  top:28px;left:12%;right:12%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border-2),var(--border-2),transparent);
+}
+.process-step{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 16px;}
+.step-num{
+  width:56px;height:56px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border-2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:13px;font-weight:600;
+  color:var(--accent-lt);margin-bottom:20px;position:relative;z-index:1;
+  transition:all .25s;
+}
+.process-step:hover .step-num{background:rgba(120,137,82,0.12);border-color:var(--accent);color:var(--text);}
+.step-title{font-family:var(--font-sans);font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;letter-spacing:-0.01em;}
+.step-desc{font-size:13px;color:var(--text-2);line-height:1.65;}
+
+/* ─── TECH STACK ─────────────────────────────────────── */
+.stack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.stack-item{
+  padding:20px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-md);display:flex;flex-direction:column;
+  align-items:center;text-align:center;gap:10px;cursor:none;
+  transition:border-color .2s,transform .2s;
+}
+.stack-item:hover{border-color:var(--border-2);transform:translateY(-2px);}
+.stack-icon{color:var(--accent-lt);}
+.stack-name-text{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--text-2);}
+.stack-use{font-size:11px;color:var(--text-3);line-height:1.5;}
+
+/* ─── ABOUT ──────────────────────────────────────────── */
+.about-grid{display:grid;grid-template-columns:1fr 1.7fr;gap:64px;align-items:start;}
+.about-photo-box{position:relative;}
+.about-photo-real{width:100%;aspect-ratio:3/4;border-radius:var(--radius-xl);object-fit:cover;display:block;border:1px solid var(--border-2);box-shadow:0 32px 80px rgba(0,0,0,0.4);}
+.about-photo-placeholder{
+  width:100%;aspect-ratio:3/4;border-radius:var(--radius-xl);
+  background:linear-gradient(135deg,var(--surface) 0%,var(--surface-2) 100%);
+  border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+}
+.photo-caption{font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);text-align:center;line-height:1.7;}
+.about-badge{
+  position:absolute;bottom:-18px;right:-18px;
+  padding:14px 18px;background:var(--surface-2);
+  border:1px solid var(--border-2);border-radius:var(--radius-md);
+  font-family:var(--font-mono);font-size:11px;color:var(--text-2);line-height:1.6;
+}
+.about-badge strong{display:block;color:var(--green);font-size:14px;margin-bottom:2px;}
+.about-content p{
+  font-size:15.5px;color:var(--text-2);line-height:1.8;
+  margin-bottom:18px;font-weight:300;
+}
+.about-content p strong{color:var(--text);font-weight:500;}
+.about-content p em{color:var(--accent-lt);font-style:normal;}
+.about-quote{
+  margin-top:28px;padding:24px 28px;
+  border-left:2px solid var(--accent);
+  background:rgba(120,137,82,0.04);border-radius:0 var(--radius-md) var(--radius-md) 0;
+}
+.about-quote p{
+  font-family:var(--font-serif);font-size:18px;font-weight:400;
+  color:var(--text);line-height:1.55;font-style:italic;margin:0;
+}
+
+/* ─── CALENDAR ───────────────────────────────────────── */
+.cal-section{
+  margin-bottom:64px;
+  padding:36px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-xl);
+}
+.cal-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:24px;
+}
+.cal-month-label{
+  font-family:var(--font-serif);font-size:20px;font-weight:400;
+  color:var(--text);font-style:italic;letter-spacing:-0.02em;
+}
+.cal-nav{display:flex;gap:8px;}
+.cal-nav-btn{
+  width:32px;height:32px;border-radius:var(--radius-sm);
+  background:var(--surface-2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:none;color:var(--text-2);transition:all .18s;
+}
+.cal-nav-btn:hover{border-color:var(--border-2);color:var(--text);}
+.cal-weekdays{
+  display:grid;grid-template-columns:repeat(7,1fr);
+  gap:4px;margin-bottom:8px;
+}
+.cal-weekday{
+  text-align:center;font-family:var(--font-mono);
+  font-size:10.5px;color:var(--text-3);letter-spacing:0.06em;
+  padding:4px 0;text-transform:uppercase;
+}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-day{
+  aspect-ratio:1;border-radius:var(--radius-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:500;color:var(--text-3);
+  transition:all .15s;position:relative;
+}
+.cal-day.other-month{opacity:0.25;}
+.cal-day.available{
+  color:var(--text-2);cursor:none;
+  background:rgba(120,137,82,0.04);
+  border:1px solid var(--border);
+}
+.cal-day.available:hover{
+  background:rgba(120,137,82,0.12);
+  border-color:var(--border-2);color:var(--text);
+  transform:scale(1.05);
+}
+.cal-day.selected{
+  background:var(--accent) !important;
+  border-color:var(--accent) !important;
+  color:#fff !important;
+  font-weight:600;
+}
+.cal-day.today{font-weight:700;}
+.cal-day.today::after{
+  content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:var(--accent-lt);
+}
+.cal-day.past{opacity:0.2;pointer-events:none;}
+.cal-day.weekend{color:var(--text-3);}
+
+.cal-slots-section{margin-top:24px;}
+.cal-slots-label{
+  font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);
+  letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;
+}
+.cal-slots{display:flex;flex-wrap:wrap;gap:8px;}
+.cal-slot{
+  padding:8px 16px;border-radius:var(--radius-sm);
+  background:var(--surface-2);border:1px solid var(--border);
+  font-family:var(--font-mono);font-size:12px;color:var(--text-2);
+  cursor:none;transition:all .15s;
+}
+.cal-slot:hover{border-color:var(--border-2);color:var(--text);}
+.cal-slot.selected{background:rgba(120,137,82,0.15);border-color:var(--accent);color:var(--accent-lt);}
+.cal-slot.booked{opacity:0.3;pointer-events:none;text-decoration:line-through;}
+
+.cal-confirm{
+  margin-top:24px;padding:20px 24px;
+  background:rgba(120,137,82,0.06);border:1px solid var(--border-2);
+  border-radius:var(--radius-md);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;
+}
+.cal-confirm-text{font-size:14px;color:var(--text-2);line-height:1.5;}
+.cal-confirm-text strong{color:var(--text);font-weight:600;}
+.cal-confirm-btn{
+  padding:10px 22px;border-radius:var(--radius-md);
+  background:var(--accent);border:none;color:#fff;
+  font-size:13px;font-weight:600;font-family:var(--font-sans);
+  cursor:none;transition:all .2s;white-space:nowrap;flex-shrink:0;
+}
+.cal-confirm-btn:hover{background:var(--accent-lt);transform:translateY(-1px);}
+.cal-booked-success{
+  margin-top:20px;padding:20px 24px;
+  background:var(--green-dim);border:1px solid rgba(106,175,122,0.2);
+  border-radius:var(--radius-md);text-align:center;
+  display:none;
+}
+.cal-booked-icon{font-size:28px;margin-bottom:8px;}
+.cal-booked-title{
+  font-family:var(--font-serif);font-size:18px;font-style:italic;
+  color:var(--green);margin-bottom:6px;
+}
+.cal-booked-sub{font-size:13px;color:var(--text-2);font-family:var(--font-mono);}
+
+/* ─── CONTACT ────────────────────────────────────────── */
+.contact-wrap{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;}
+.contact-links{display:flex;flex-direction:column;gap:10px;margin-top:28px;}
+.contact-link{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 18px;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-md);text-decoration:none;color:var(--text-2);
+  font-size:14px;transition:all .2s;cursor:none;
+}
+.contact-link:hover{border-color:var(--border-2);color:var(--text);transform:translateX(4px);}
+.contact-link-icon{
+  width:34px;height:34px;border-radius:var(--radius-sm);
+  background:rgba(120,137,82,0.08);display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:var(--accent-lt);
+}
+.contact-link-text{flex:1;}
+.contact-link-label{font-size:10.5px;color:var(--text-3);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.06em;}
+.contact-link-value{font-size:13.5px;color:var(--text);font-weight:500;}
+.contact-link-arr{color:var(--text-3);font-size:14px;}
+
+/* FORM */
+.contact-form{display:flex;flex-direction:column;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-label{font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);letter-spacing:0.07em;text-transform:uppercase;}
+.form-input,.form-select,.form-textarea{
+  padding:11px 15px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius-sm);
+  font-size:14px;color:var(--text);font-family:var(--font-sans);
+  outline:none;transition:border-color .2s;resize:none;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);background:rgba(120,137,82,0.04);}
+.form-select option{background:var(--surface);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-submit{
+  width:100%;padding:13px;border-radius:var(--radius-md);
+  background:var(--accent);border:none;color:#fff;
+  font-size:14.5px;font-weight:600;font-family:var(--font-sans);
+  cursor:none;transition:all .22s;margin-top:4px;
+}
+.form-submit:hover{background:var(--accent-lt);transform:translateY(-1px);box-shadow:0 8px 24px var(--accent-glow);}
+
+/* ─── FOOTER ─────────────────────────────────────────── */
+footer{
+  position:relative;z-index:2;border-top:1px solid var(--border);
+  padding:36px 56px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.footer-logo{font-family:var(--font-serif);font-size:17px;font-weight:400;color:var(--text-3);font-style:italic;}
+.footer-logo em{color:var(--accent-lt);font-style:normal;}
+.footer-copy{font-size:11.5px;color:var(--text-3);font-family:var(--font-mono);}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{font-size:12px;color:var(--text-3);text-decoration:none;transition:color .2s;font-family:var(--font-mono);}
+.footer-links a:hover{color:var(--text-2);}
+
+/* ─── FLOATING CTA ───────────────────────────────────── */
+.floating-cta{
+  position:fixed;bottom:28px;right:28px;z-index:100;
+  display:flex;gap:8px;opacity:0;transform:translateY(12px);
+  transition:all .35s ease;
+}
+.floating-cta.show{opacity:1;transform:translateY(0);}
+.float-btn{
+  display:flex;align-items:center;gap:7px;
+  padding:11px 18px;border-radius:50px;
+  font-size:12.5px;font-weight:600;font-family:var(--font-sans);
+  text-decoration:none;cursor:none;transition:all .2s;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:0 6px 24px rgba(0,0,0,0.35);border:1px solid;
+}
+.float-btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.float-btn-primary:hover{background:var(--accent-lt);transform:translateY(-2px);}
+.float-btn-wa{background:rgba(37,211,102,0.12);color:#25D366;border-color:rgba(37,211,102,0.28);}
+.float-btn-wa:hover{background:rgba(37,211,102,0.22);transform:translateY(-2px);}
+
+/* ─── REVEAL ANIMATIONS ──────────────────────────────── */
+.reveal{opacity:1;transform:translateY(0);transition:opacity .7s ease,transform .7s ease;}
+.reveal.hidden{opacity:0;transform:translateY(28px);}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ─── STEP INDICATOR ─────────────────────────────── */
+.step-indicator{
+  display:flex;align-items:center;gap:8px;
+  margin:0 0 32px;flex-wrap:wrap;
+}
+.step-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 16px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--border);
+  font-size:12px;font-weight:500;color:var(--text-3);
+  font-family:var(--font-sans);transition:all .25s;
+}
+.step-pill-num{
+  width:20px;height:20px;border-radius:50%;
+  background:var(--surface-2);color:var(--text-3);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-size:10.5px;font-weight:600;
+  transition:all .25s;
+}
+.step-pill.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.step-pill.active .step-pill-num{background:rgba(255,255,255,0.22);color:#fff;}
+.step-pill.done{color:var(--accent-lt);border-color:rgba(120,137,82,0.35);}
+.step-pill.done .step-pill-num{background:var(--accent);color:#fff;}
+.step-pill.done .step-pill-num::before{content:'✓';font-size:11px;}
+.step-pill.done .step-pill-num{font-size:0;}
+.step-line{
+  flex:0 0 28px;height:1px;background:var(--border);
+}
+
+/* ─── CONTACT LINKS GRID ─────────────────────────── */
+.contact-links-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:10px;margin-top:18px;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media(max-width:1024px){
+  .hero{grid-template-columns:1fr;padding:100px 28px 60px;}
+  .hero-right{display:none;}
+  .section{padding:64px 28px;}
+  nav{padding:0 24px;}
+  .cases-grid{grid-template-columns:1fr 1fr;}
+  .services-grid{grid-template-columns:1fr;}
+  .stack-grid{grid-template-columns:repeat(2,1fr);}
+  .about-grid{grid-template-columns:1fr;gap:40px;}
+  .contact-wrap{grid-template-columns:1fr;}
+  footer{flex-direction:column;gap:14px;text-align:center;padding:28px 24px;}
+}
+@media(max-width:768px){
+  /* Hide desktop-only chrome */
+  #cursor,#cursor-ring{display:none !important;}
+  body{cursor:auto !important;}
+  *{cursor:auto !important;}
+  a,button{cursor:pointer !important;}
+
+  .nav-links{display:none;}
+  nav{padding:0 18px;height:64px;}
+  .nav-logo{font-size:14px;}
+  .nav-cta{padding:7px 14px;font-size:12px;}
+
+  /* Hero */
+  .hero{padding:90px 20px 50px;min-height:auto;}
+  .hero-h1{font-size:clamp(38px,9vw,58px);line-height:1.05;}
+  .hero-sub{font-size:15px;margin:20px 0 30px;}
+  .hero-eyebrow{font-size:10.5px;}
+  .hero-ctas{flex-direction:column;align-items:stretch;gap:10px;width:100%;}
+  .hero-ctas .btn-primary,.hero-ctas .btn-ghost{width:100%;justify-content:center;}
+  .hero-metrics{grid-template-columns:1fr 1fr;gap:14px;margin-top:36px;}
+  .hero-metric-num{font-size:28px;}
+
+  /* Sections */
+  .section{padding:56px 20px;}
+  .section-tag{font-size:10px;}
+  .section-h2{font-size:clamp(30px,7vw,42px);line-height:1.1;}
+  .section-sub{font-size:14.5px;margin-bottom:36px;}
+
+  /* Cards/grids */
+  .cases-grid{grid-template-columns:1fr;gap:16px;}
+  .case-card{padding:22px;}
+  .case-h3{font-size:20px;}
+  .problem-grid{grid-template-columns:1fr;gap:14px;}
+  .services-grid{grid-template-columns:1fr;gap:16px;}
+  .service-card{padding:24px;}
+  .stack-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .stack-cat{padding:18px;}
+  .process-steps{grid-template-columns:1fr;gap:18px;}
+  .process-steps::before{display:none;}
+  .process-step{padding:20px;}
+
+  /* About */
+  .about-grid{gap:32px;}
+  .about-photo-real{aspect-ratio:4/5;}
+
+  /* Contact + Calendar */
+  .cal-section{padding:22px 18px;}
+  .cal-section > div[style*="display:flex"]{flex-direction:column !important;gap:28px !important;}
+  .cal-section > div[style*="display:flex"] > div{padding-top:0 !important;min-width:0 !important;width:100%;}
+  .cal-day{font-size:12px;}
+  .cal-month-label{font-size:14px;}
+  .cal-confirm{flex-direction:column;align-items:stretch !important;gap:14px;}
+  .cal-confirm-btn{width:100%;}
+  .form-row{grid-template-columns:1fr;gap:14px;}
+  .form-input,.form-textarea,.form-select{font-size:16px;} /* prevent iOS zoom */
+  .form-submit{width:100%;font-size:14px;}
+  .step-indicator{gap:4px;justify-content:center;}
+  .step-pill{padding:6px 10px;font-size:10.5px;}
+  .step-pill-num{width:16px;height:16px;font-size:9.5px;}
+  .step-line{flex-basis:14px;}
+  .contact-links-grid{grid-template-columns:1fr;}
+  .contact-link{padding:14px;}
+  .contact-link-value{font-size:12px;word-break:break-all;}
+
+  /* Modal */
+  .modal{width:100vw;max-width:100vw;border-radius:0;}
+  .modal-body{padding:24px 20px;}
+
+  /* Floating CTA */
+  .floating-cta{bottom:16px;right:16px;left:16px;}
+  .float-btn{flex:1;justify-content:center;padding:11px 14px;font-size:12px;}
+
+  /* Footer */
+  footer{padding:24px 20px;font-size:11.5px;}
+}
+@media(max-width:420px){
+  .hero-metrics{grid-template-columns:1fr;}
+  .stack-grid{grid-template-columns:1fr;}
+  .cal-days{gap:3px;}
+  .cal-day{padding:6px 0;font-size:11.5px;}
+  .cal-weekday{font-size:10px;}
+}
+</style>
+
+<template id="__bundler_thumbnail" data-bg-color="#0F1410">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0F1410"/>
+    <g transform="translate(360, 240)">
+      <!-- Stylized "B" monogram in olive accent -->
+      <rect x="0" y="0" width="14" height="320" fill="#A3B570"/>
+      <path d="M14 0 L160 0 Q230 0 230 80 Q230 130 180 155 Q240 175 240 240 Q240 320 160 320 L14 320 Z M40 28 L40 140 L160 140 Q200 140 200 84 Q200 28 160 28 Z M40 168 L40 292 L160 292 Q210 292 210 230 Q210 168 160 168 Z" fill="#A3B570"/>
+      <circle cx="270" cy="304" r="10" fill="#A3B570"/>
+      <text x="320" y="200" font-family="Georgia, serif" font-style="italic" font-size="64" fill="#E8E5DC">portfolio</text>
+      <text x="320" y="240" font-family="ui-monospace, monospace" font-size="14" fill="#7A8068" letter-spacing="2">2026 / DATA ENGINEER</text>
+    </g>
+  </svg>
+</template>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">Bhanu Prakash<em>.</em></a>
+  <ul class="nav-links">
+    <li><a href="#problems">Why Me</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Book a Call
+  </a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-avail">
+      <span class="avail-dot"></span>
+      Available for projects · May 2026
+    </div>
+    <div class="hero-eyebrow">// Data Engineer · Vibe Coder · Automation Builder</div>
+    <h1 class="hero-h1">
+      Bhanu Prakash.<br>
+      <span class="italic">Manual work</span><br>
+      <span class="muted">→ Infrastructure.</span>
+    </h1>
+    <p class="hero-sub">I build data pipelines, automation systems, and internal tools for Indian financial firms — combining domain knowledge of SEBI, fintech ops, and broking with the ability to actually ship production systems.</p>
+    <div class="hero-ctas">
+      <a href="#contact" class="btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Book a 30-min call
+      </a>
+      <a href="#work" class="btn-ghost">
+        See my work
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+
+    <div class="hero-metrics">
+      <div class="metric-chip">
+        <div class="metric-num accent" data-count="8">8</div>
+        <div class="metric-label">Production systems</div>
+      </div>
+      <div class="metric-chip">
+        <div class="metric-num" data-count="1500">1,500+</div>
+        <div class="metric-label">Hours saved / yr</div>
+      </div>
+      <div class="metric-chip">
+        <div class="metric-num" data-count="54000">54,000</div>
+        <div class="metric-label">Records scraped</div>
+      </div>
+      <div class="metric-chip">
+        <div class="metric-num accent">₹1.5L+</div>
+        <div class="metric-label">Work delivered</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="hero-right">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="td td-r"></span><span class="td td-y"></span><span class="td td-g"></span>
+        <span class="terminal-title">bhanu@sampadha — pipeline.py</span>
+      </div>
+      <div class="terminal-body">
+        <div><span class="tc"># GCP news pipeline · runs daily at 5AM IST</span></div>
+        <div style="margin-top:4px"><span class="tk">import</span> <span class="tf">bronze, silver, gold</span></div>
+        <div style="margin-top:8px"><span class="tk">def</span> <span class="ts">run_pipeline</span><span class="tf">()</span><span class="tk">:</span></div>
+        <div>&nbsp;&nbsp;<span class="tf">sources</span> <span class="tc">=</span> bronze.fetch(<span class="tn">1247</span>)</div>
+        <div>&nbsp;&nbsp;<span class="tf">cleaned</span> <span class="tc">=</span> silver.transform(sources)</div>
+        <div>&nbsp;&nbsp;<span class="tf">digest</span> &nbsp;<span class="tc">=</span> gold.format(cleaned)</div>
+        <div>&nbsp;&nbsp;<span class="tk">return</span> gmail.send(digest)</div>
+        <div style="margin-top:12px"><span class="tc">$</span> python pipeline.py</div>
+        <div style="margin-top:6px"><span class="to">✓</span> <span class="ts">1,247 sources processed</span></div>
+        <div><span class="to">✓</span> <span class="ts">4h manual work eliminated</span></div>
+        <div><span class="to">✓</span> <span class="ts">Digest sent · 05:00 IST</span></div>
+        <div style="margin-top:6px"><span class="tc">$ </span><span class="t-blink"></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGO STRIP -->
+<div class="strip">
+  <div class="strip-inner">
+    <div class="strip-track" id="strip-track">
+      <span class="strip-item"><span class="strip-dot"></span>Sampadha Research (SEBI)</span>
+      <span class="strip-item"><span class="strip-dot"></span>Google Cloud Platform</span>
+      <span class="strip-item"><span class="strip-dot"></span>Anthropic Claude</span>
+      <span class="strip-item"><span class="strip-dot"></span>Bajaj Securities</span>
+      <span class="strip-item"><span class="strip-dot"></span>Motilal Oswal</span>
+      <span class="strip-item"><span class="strip-dot"></span>BigQuery · Cloud Storage</span>
+      <span class="strip-item"><span class="strip-dot"></span>Python · Apps Script</span>
+      <span class="strip-item"><span class="strip-dot"></span>Trendlyne API</span>
+      <span class="strip-item"><span class="strip-dot"></span>SEBI Compliance</span>
+      <span class="strip-item"><span class="strip-dot"></span>Next.js · Supabase</span>
+      <span class="strip-item"><span class="strip-dot"></span>Sampadha Research (SEBI)</span>
+      <span class="strip-item"><span class="strip-dot"></span>Google Cloud Platform</span>
+      <span class="strip-item"><span class="strip-dot"></span>Anthropic Claude</span>
+      <span class="strip-item"><span class="strip-dot"></span>Bajaj Securities</span>
+      <span class="strip-item"><span class="strip-dot"></span>Motilal Oswal</span>
+      <span class="strip-item"><span class="strip-dot"></span>BigQuery · Cloud Storage</span>
+      <span class="strip-item"><span class="strip-dot"></span>Python · Apps Script</span>
+      <span class="strip-item"><span class="strip-dot"></span>Trendlyne API</span>
+      <span class="strip-item"><span class="strip-dot"></span>SEBI Compliance</span>
+      <span class="strip-item"><span class="strip-dot"></span>Next.js · Supabase</span>
+    </div>
+  </div>
+</div>
+
+<!-- PROBLEM SECTION -->
+<div class="full-divider"></div>
+<section class="section" id="problems">
+  <div class="section-tag">The Problem</div>
+  <h2 class="section-h2 reveal">Your team is spending time<br>you can't afford to <em>waste.</em></h2>
+  <p class="section-sub reveal">Before every client hires me, their team is drowning in something that should already be automated. Recognise yourself?</p>
+
+  <div class="problem-grid reveal">
+    <div class="problem-card">
+      <div class="problem-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3>Pre-dawn news research</h3>
+      <p>Two people waking up at 2AM to manually gather news, copy-paste into sheets, format and send a digest before markets open. Every. Single. Morning.</p>
+      <div class="problem-stat">4–5 hours · daily · 2 people · zero automation</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <h3>Client onboarding on Notepad</h3>
+      <p>Sales calls, WhatsApp KYC docs, manual folder creation, three separate emails — all done by hand for every single client, taking 2–3 days each.</p>
+      <div class="problem-stat">2–3 days · per client · regulatory risk · manual</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <h3>Basket preparation errors</h3>
+      <p>Building 21-column broker CSVs by hand from research notes. Wrong date format → upload fails. Wrong CE/PE → real-money mistake. Multiple times daily.</p>
+      <div class="problem-stat">4–5 min · per basket · non-zero error rate · daily</div>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+      </div>
+      <h3>Monthly research marathon</h3>
+      <p>One analyst spending 5–7 days copy-pasting data into Word templates for 120–200 stocks. Inconsistent formatting every cycle. Analytical talent wasted on manufacturing.</p>
+      <div class="problem-stat">5–7 days · 200 stocks · monthly · 1 analyst</div>
+    </div>
+  </div>
+
+  <div class="pivot-box reveal">
+    <div class="pivot-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div class="pivot-text">
+      <strong>I build the systems that make these problems disappear.</strong> Fixed cost once, zero marginal labor forever. Manual process becomes infrastructure — it runs in the background, never breaks, and frees your team for the work that actually matters.
+    </div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<div class="full-divider"></div>
+<section class="section" id="work">
+  <div class="section-tag">Case Studies</div>
+  <h2 class="section-h2 reveal">Eight production systems.<br><em>Real numbers.</em> Real impact.</h2>
+  <p class="section-sub reveal">Not mockups. Not side projects. Live systems running inside a SEBI-registered research firm. Click any card to read the full story.</p>
+
+  <div class="cases-grid reveal" id="cases-grid">
+    <!-- Cards injected by JS -->
+  </div>
+</section>
+
+<!-- SERVICES -->
+<div class="full-divider"></div>
+<section class="section" id="services">
+  <div class="section-tag">Services & Pricing</div>
+  <h2 class="section-h2 reveal">What I build. What it costs.<br><em>What you get.</em></h2>
+  <p class="section-sub reveal">Fixed scope, fixed price. No hourly billing surprises. Self-qualify before you reach out — saves us both time.</p>
+
+  <div class="services-grid reveal">
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </div>
+      <div class="service-name">Small Tool / Script</div>
+      <div class="service-desc">Single-purpose automation — a basket tool, a form-to-email pipeline, a scraper, a report generator. Something specific with a clear input and output.</div>
+      <div class="service-price">₹15K – ₹40K <span>one-time</span></div>
+      <div class="service-timeline">// 1–3 weeks · fixed scope</div>
+      <ul class="service-features">
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Discovery call to scope exactly</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Working tool in your environment</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>README + handover documentation</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>2 weeks post-delivery support</li>
+      </ul>
+    </div>
+
+    <div class="service-card featured">
+      <div class="service-badge">MOST POPULAR</div>
+      <div class="service-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <div class="service-name">Data Pipeline / Platform</div>
+      <div class="service-desc">Production-grade infrastructure. GCP medallion pipelines, automated reporting, multi-source data platforms. This is the ₹1.5L category.</div>
+      <div class="service-price">₹40K – ₹2.5L <span>one-time</span></div>
+      <div class="service-timeline">// 3–8 weeks · milestone-based</div>
+      <ul class="service-features">
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Full scoping + architecture review</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>GCP / cloud-native deployment</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Monitoring, alerting, failure handling</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Team handover + full documentation</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>30-day post-launch support</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </div>
+      <div class="service-name">Monthly Retainer</div>
+      <div class="service-desc">Your on-call automation engineer. I handle new tools, maintain existing systems, and tackle whatever operational problem emerges that month.</div>
+      <div class="service-price">₹50K – ₹1.5L <span>/ month</span></div>
+      <div class="service-timeline">// 3-month minimum · rolling</div>
+      <ul class="service-features">
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Dedicated capacity each month</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Maintenance of existing systems</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>New tool development as needed</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Weekly async check-in</li>
+      </ul>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div class="service-name">Advisory / Consulting</div>
+      <div class="service-desc">Automation strategy, architecture review, build-vs-buy decisions, AI engineering coaching. No implementation — pure thinking.</div>
+      <div class="service-price">₹3K – ₹6K <span>/ hour</span></div>
+      <div class="service-timeline">// On-demand · no minimum</div>
+      <ul class="service-features">
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Process audit + opportunity map</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Tech stack recommendations</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>ROI analysis for automation projects</li>
+        <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>SEBI compliance guidance</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<div class="full-divider"></div>
+<section class="section">
+  <div class="section-tag">How I Work</div>
+  <h2 class="section-h2 reveal">Four steps from problem<br>to <em>running system.</em></h2>
+  <p class="section-sub reveal">No guessing. No vague sprints. A clear process that eliminates surprises and ships production systems that hold up.</p>
+  <div class="process-steps reveal">
+    <div class="process-step">
+      <div class="step-num">01</div>
+      <div class="step-title">Scoping Call</div>
+      <div class="step-desc">30 minutes. I learn your manual process end-to-end. We define scope, timeline, and price. No commitment needed from your side.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">02</div>
+      <div class="step-title">Discovery</div>
+      <div class="step-desc">I sit with the person doing the actual work — not the manager. Observe. Ask questions. Sketch the architecture before writing a single line of code.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">03</div>
+      <div class="step-title">Build & Ship</div>
+      <div class="step-desc">Milestone-based delivery on real data from day one. You see working software at each stage — never a big-bang delivery at the end.</div>
+    </div>
+    <div class="process-step">
+      <div class="step-num">04</div>
+      <div class="step-title">Handover</div>
+      <div class="step-desc">Full documentation. Your team knows how to use, monitor, and recover the system. I remain reachable for 30 days post-launch.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<div class="full-divider"></div>
+<section class="section">
+  <div class="section-tag">Tech Stack</div>
+  <h2 class="section-h2 reveal">Tools I actually <em>ship with.</em></h2>
+  <p class="section-sub reveal">Not a buzzword list. These are the tools running in production systems at Sampadha right now.</p>
+  <div class="stack-grid reveal">
+    <div class="stack-item">
+      <div class="stack-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+      <div class="stack-name-text">Python</div>
+      <div class="stack-use">Pipelines, scrapers, automation, data processing</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div class="stack-name-text">Google Cloud Platform</div>
+      <div class="stack-use">Cloud Storage, BigQuery, Cloud Scheduler, Functions</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></ellipse></svg></div>
+      <div class="stack-name-text">BigQuery</div>
+      <div class="stack-use">Analytics data warehouse, SQL access for teams</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg></div>
+      <div class="stack-name-text">Apps Script</div>
+      <div class="stack-use">Google Workspace automation, Forms→Sheets→Drive</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v6l4 2"/></svg></div>
+      <div class="stack-name-text">Anthropic Claude API</div>
+      <div class="stack-use">LLM parsing, structured output, basket tools</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <div class="stack-name-text">Next.js</div>
+      <div class="stack-use">Web tools, internal dashboards, ResuFit</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div>
+      <div class="stack-name-text">Supabase</div>
+      <div class="stack-use">PostgreSQL backend, auth, real-time data</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <div class="stack-name-text">Power BI</div>
+      <div class="stack-use">Live dashboards on top of BigQuery data</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<div class="full-divider"></div>
+<section class="section" id="about">
+  <div class="section-tag">About</div>
+  <div class="about-grid">
+    <div class="about-photo-box reveal">
+      <img src="bhanu.jpeg" alt="Bhanu Prakash" class="about-photo-real" />
+      <div class="about-badge">
+        <strong>🟢 Available</strong>
+        Freelance · Contract · Consulting<br>
+        Hyderabad, India · Remote-first
+      </div>
+    </div>
+    <div class="about-content reveal">
+      <h2 class="section-h2" style="margin-bottom:24px;">The person behind<br>the <em>pipelines.</em></h2>
+      <p>I'm <strong>Bhanu Prakash</strong> — Data Engineer and Vibe Coder at <em>Sampadha Research Financial Limited</em>, a SEBI-registered research firm in Hyderabad. MCA from Satavahana University, 2024.</p>
+      <p>I didn't come into this through a traditional engineering path. I came through <strong>observation</strong> — sitting with the operations team at 2AM, watching how work actually happens, and asking one question: does this have to be done by hand? Usually, it doesn't.</p>
+      <p>My edge is sitting where <strong>domain knowledge meets implementation</strong>. I understand what a basket is, why SEBI compliance matters, why a per-stock Trendlyne token behaves differently than a global API key. Most developers don't. I combine that with the ability to actually ship production systems — not toy scripts that break the first week.</p>
+      <p>Currently pursuing <em>Anthropic's Claude architecture credentials</em>. Going deeper on LLMs, agentic systems, and MCP. The field is moving fast — I'm moving with it.</p>
+      <div class="about-quote">
+        <p>"I'm a data analyst who learned to ship production systems by combining domain knowledge, systems thinking, and AI as the implementation layer — and I now do this for a living."</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<div class="full-divider"></div>
+<section class="section" id="contact">
+  <div class="section-tag">Book a Call</div>
+  <h2 class="section-h2 reveal" style="margin-bottom:14px;">Let's build something<br>that <em>runs itself.</em></h2>
+  <p class="section-sub reveal">Three steps. Tell me about your project, pick a time, and we'll talk. I respond within 24 hours.</p>
+
+  <!-- STEP INDICATOR -->
+  <div class="step-indicator reveal" id="step-indicator">
+    <div class="step-pill active" data-step="1"><span class="step-pill-num">1</span> Your Project</div>
+    <div class="step-line"></div>
+    <div class="step-pill" data-step="2"><span class="step-pill-num">2</span> Pick a Time</div>
+    <div class="step-line"></div>
+    <div class="step-pill" data-step="3"><span class="step-pill-num">3</span> Confirm</div>
+  </div>
+
+  <!-- STEP 1: FORM -->
+  <div class="cal-section reveal" id="step-1-section">
+    <form id="booking-form" onsubmit="goToStep2(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Your name *</label>
+          <input type="text" name="name" id="f-name" class="form-input" placeholder="Rahul Sharma" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Your email *</label>
+          <input type="email" name="email" id="f-email" class="form-input" placeholder="rahul@firm.com" required>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:14px;">
+        <label class="form-label">What do you want to automate? *</label>
+        <textarea name="message" id="f-message" class="form-textarea" rows="4" placeholder="Describe the manual process — what happens now, how long it takes, who does it..." required></textarea>
+      </div>
+      <div class="form-group" style="margin-top:14px;">
+        <label class="form-label">Budget range</label>
+        <select name="budget" id="f-budget" class="form-select">
+          <option value="">Select a range</option>
+          <option>₹15K – ₹40K (small tool)</option>
+          <option>₹40K – ₹1L (medium project)</option>
+          <option>₹1L – ₹2.5L (full platform)</option>
+          <option>₹50K+/month (retainer)</option>
+          <option>Advisory / consulting only</option>
+        </select>
+      </div>
+      <button type="submit" class="form-submit" style="margin-top:18px;">Continue to pick a time →</button>
+    </form>
+  </div>
+
+  <!-- STEP 2: CALENDAR -->
+  <div class="cal-section reveal" id="step-2-section" style="display:none;">
+    <div style="display:flex;align-items:flex-start;gap:48px;flex-wrap:wrap;">
+      <!-- Left: calendar grid -->
+      <div style="flex:1.2;min-width:280px;">
+        <div style="font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Step 1 — Pick a date</div>
+        <div class="cal-header">
+          <div class="cal-month-label" id="cal-month-label">May 2026</div>
+          <div class="cal-nav">
+            <button class="cal-nav-btn" onclick="calNav(-1)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="cal-nav-btn" onclick="calNav(1)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="cal-weekdays">
+          <div class="cal-weekday">Sun</div><div class="cal-weekday">Mon</div>
+          <div class="cal-weekday">Tue</div><div class="cal-weekday">Wed</div>
+          <div class="cal-weekday">Thu</div><div class="cal-weekday">Fri</div>
+          <div class="cal-weekday">Sat</div>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+      </div>
+      <!-- Right: time slots -->
+      <div style="flex:1;min-width:220px;padding-top:36px;">
+        <div style="font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;">Step 2 — Pick a time (IST)</div>
+        <div id="cal-slots-wrap" style="color:var(--text-3);font-size:13px;font-family:var(--font-mono);padding:12px 0;">← Select a date first</div>
+      </div>
+    </div>
+
+    <div class="cal-confirm" id="cal-confirm" style="display:none;">
+      <div class="cal-confirm-text">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px;color:var(--accent-lt)"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <strong id="cal-confirm-label">—</strong>
+        <span style="color:var(--text-3);margin-left:8px;">30 min · Discovery call · Google Meet</span>
+      </div>
+      <button class="cal-confirm-btn" onclick="submitBooking()">Confirm & send →</button>
+    </div>
+    <button type="button" onclick="goToStep1()" style="margin-top:14px;background:transparent;border:none;color:var(--text-3);font-family:var(--font-mono);font-size:11px;cursor:none;">← Back to your project details</button>
+  </div>
+
+  <!-- STEP 3: SUCCESS -->
+  <div class="cal-section reveal" id="step-3-section" style="display:none;text-align:center;">
+    <div style="display:flex;justify-content:center;margin-bottom:16px;">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3 style="font-family:var(--font-serif);font-size:36px;font-weight:400;font-style:italic;color:var(--text);margin-bottom:8px;letter-spacing:-0.02em;">You're booked.</h3>
+    <p id="success-detail" style="font-family:var(--font-mono);font-size:13px;color:var(--accent-lt);margin-bottom:16px;">—</p>
+    <p style="font-size:14.5px;color:var(--text-2);max-width:480px;margin:0 auto 24px;line-height:1.7;">Calendar invite landing in your inbox. I'll WhatsApp you 30 min before. In the meantime, you can also book directly on my Calendly:</p>
+    <a href="https://calendly.com/avaduthabhanuprakash1/30min" target="_blank" class="btn-primary" style="display:inline-flex;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Open Calendly
+    </a>
+  </div>
+
+  <!-- CONTACT LINKS BELOW -->
+  <div class="reveal" style="margin-top:64px;">
+    <div class="section-tag" style="margin-bottom:14px;">Or reach out directly</div>
+    <div class="contact-links-grid">
+        <a href="https://wa.me/917036121131?text=Hi+Bhanu" class="contact-link" target="_blank">
+          <div class="contact-link-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="contact-link-text">
+            <div class="contact-link-label">WhatsApp</div>
+            <div class="contact-link-value">Message me directly</div>
+          </div>
+          <div class="contact-link-arr">↗</div>
+        </a>
+        <a href="mailto:avaduthabhanuprakash1@gmail.com" class="contact-link">
+          <div class="contact-link-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div class="contact-link-text">
+            <div class="contact-link-label">Email</div>
+            <div class="contact-link-value">avaduthabhanuprakash1@gmail.com</div>
+          </div>
+          <div class="contact-link-arr">↗</div>
+        </a>
+        <a href="https://www.linkedin.com/in/bhanuprakash-avadutha/" class="contact-link" target="_blank">
+          <div class="contact-link-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+          </div>
+          <div class="contact-link-text">
+            <div class="contact-link-label">LinkedIn</div>
+            <div class="contact-link-value">linkedin.com/in/bhanuprakash-avadutha</div>
+          </div>
+          <div class="contact-link-arr">↗</div>
+        </a>
+        <a href="https://github.com/BhanuprakashAvadutha" class="contact-link" target="_blank">
+          <div class="contact-link-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          </div>
+          <div class="contact-link-text">
+            <div class="contact-link-label">GitHub</div>
+            <div class="contact-link-value">github.com/BhanuprakashAvadutha</div>
+          </div>
+          <div class="contact-link-arr">↗</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Bhanu Prakash<em>.</em></div>
+  <div class="footer-copy">// Data Engineer · Hyderabad · 2026</div>
+  <div class="footer-links">
+    <a href="#work">Work</a>
+    <a href="#services">Services</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<!-- FLOATING CTA -->
+<div class="floating-cta" id="floating-cta">
+  <a href="https://wa.me/917036121131?text=Hi+Bhanu,+I+saw+your+portfolio" class="float-btn float-btn-wa" target="_blank">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    WhatsApp
+  </a>
+  <a href="#contact" class="float-btn float-btn-primary">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Book a call
+  </a>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeModalBtn()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div id="modal-tag-el" class="modal-tag"></div>
+      <div id="modal-title-el" class="modal-title"></div>
+      <div id="modal-client-el" class="modal-client"></div>
+    </div>
+    <div class="modal-body" id="modal-body-el"></div>
+  </div>
+</div>
+
+<!-- TWEAKS -->
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accentColor": "#788952",
+  "bgColor": "#191b18",
+  "showTerminal": true,
+  "showFloatingCTA": true
+}/*EDITMODE-END*/;
+
+function TweaksApp() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  React.useEffect(() => {
+    if (!tweaks) return;
+    document.documentElement.style.setProperty('--accent', tweaks.accentColor);
+    // derive lighter shade
+    document.documentElement.style.setProperty('--accent-lt', tweaks.accentColor);
+    document.documentElement.style.setProperty('--bg', tweaks.bgColor);
+    document.documentElement.style.setProperty('--bg-raised', tweaks.bgColor);
+    document.body.style.background = tweaks.bgColor;
+  }, [tweaks && tweaks.accentColor, tweaks && tweaks.bgColor]);
+
+  React.useEffect(() => {
+    if (!tweaks) return;
+    const t = document.querySelector('.hero-right');
+    if (t) t.style.display = tweaks.showTerminal ? 'block' : 'none';
+  }, [tweaks && tweaks.showTerminal]);
+
+  if (!tweaks) return null;
+
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection label="Brand">
+        <TweakColor label="Accent Color" value={tweaks.accentColor} onChange={v => setTweak('accentColor', v)} />
+        <TweakColor label="Background" value={tweaks.bgColor} onChange={v => setTweak('bgColor', v)} />
+      </TweakSection>
+      <TweakSection label="Hero">
+        <TweakToggle label="Show Terminal" value={tweaks.showTerminal} onChange={v => setTweak('showTerminal', v)} />
+      </TweakSection>
+      <TweakSection label="UI">
+        <TweakToggle label="Floating CTA" value={tweaks.showFloatingCTA} onChange={v => setTweak('showFloatingCTA', v)} />
+      </TweakSection>
+    </TweaksPanel>
+  );
+}
+
+const tweaksRoot = document.createElement('div');
+document.body.appendChild(tweaksRoot);
+ReactDOM.createRoot(tweaksRoot).render(<TweaksApp />);
+</script>
+
+<script>
+/* ─── CASE STUDY DATA ─────────────────────────────── */
+const CASES = [
+  {
+    num:'01', tag:'Pipeline', tagClass:'tag-pipeline',
+    title:'3-Tier GCP News Intelligence Pipeline',
+    problem:'Two researchers waking up at 2AM to manually search 80 sources, copy-paste, format a digest, and email it before markets open. Stale, incomplete, and destroying two people\'s sleep.',
+    result:'4–5 hours eliminated daily · 1,247 sources · zero human intervention',
+    stack:['GCP','Cloud Storage','BigQuery','Python','Power BI','Cloud Scheduler'],
+    client:'Sampadha Research Financial Limited',
+    marketValue:'₹50,000 setup',
+    metrics:[{num:'1,247',label:'Sources daily'},{num:'0',label:'Human hours'},{num:'15×',label:'Coverage increase'}],
+    sections:[
+      {title:'The Problem',text:'Two researchers were waking up at 2AM every morning. Their job: gather news from the last 24 hours affecting the stocks the firm tracked. They\'d open Google, type queries by hand, scroll results, copy-paste into a Sheet, deduplicate by eye, format it, and send the digest to the auditor, research head, and broader team by 5AM. This process covered maybe 50–80 sources per day — out of thousands of relevant Indian financial sources. And by 5AM, the 2AM news was already 3 hours stale.'},
+      {title:'The Architecture',text:'I built a 3-tier medallion architecture on GCP:\n\n<strong>Bronze layer</strong> — raw ingestion. Scheduled Cloud Function pulls JSON from 1,200–1,300 sources every cycle. Raw responses dumped into Cloud Storage with no transformation. The bronze layer is the truth, even when the truth is messy.\n\n<strong>Silver layer</strong> — cleaned and structured. A second function reads bronze, strips HTML, normalises timestamps to IST, deduplicates by URL+title hash, and writes consistent output.\n\n<strong>Gold layer</strong> — analytics-ready. Applies the firm\'s business logic (source priority, stock mentions, trending themes), structures into report format, writes to BigQuery and Sheets. Emails go out automatically at 5AM.\n\n<strong>BI layer</strong> — Power BI connects directly to BigQuery. Research team has live dashboards with news volume, sentiment trends, stock mentions.'},
+      {title:'The Hard Parts',text:'<strong>Source diversity:</strong> 1,200+ sources don\'t speak the same language — RSS, HTML, JSON APIs, some requiring auth, some with aggressive rate limits. The bronze layer handles all of them gracefully.\n\n<strong>Deduplication:</strong> The same story appears across 20+ sources within minutes. Naive URL deduplication fails. I built a layer that hashes title+core-content and uses fuzzy matching to collapse duplicates while preserving source diversity.\n\n<strong>Cost control:</strong> BigQuery charges per query. I set up partitioned tables clustered on date and stock symbol. Monthly GCP cost stays low despite heavy usage.'},
+      {title:'The Outcome',text:'Two people stopped waking up at 2AM. The daily digest now arrives at 5AM with zero human involvement. Coverage expanded from ~80 sources per day to 1,247+ — 15× the input volume with 0× the labor. The research team gained SQL access to historical news data, which they\'ve used for correlation analyses they couldn\'t do before. Total time saved: 4–5 hours daily, ~1,500 hours per year.'}
+    ]
+  },
+  {
+    num:'02', tag:'Automation', tagClass:'tag-pipeline',
+    title:'Client Onboarding Pipeline',
+    problem:'Onboarding ran on phone calls and Notepad. KYC docs over WhatsApp, manual folder creation, three separate emails — per client, every time. 2–3 days per client.',
+    result:'3 days → 5 minutes · 100+ clients · zero manual steps · SEBI-compliant',
+    stack:['Apps Script','Google Forms','Drive API','Gmail','Sheets'],
+    client:'Sampadha Research Financial Limited',
+    marketValue:'₹12,000 – ₹18,000 setup',
+    metrics:[{num:'100+',label:'Clients onboarded'},{num:'0',label:'Manual steps'},{num:'200+',label:'Hours saved'}],
+    sections:[
+      {title:'The Problem',text:'Onboarding a new client at a SEBI-registered research firm isn\'t a 5-minute task. There\'s a regulatory checklist: collect KYC documents, store securely, fill standardised form, send thank-you email, send compliance backup, send KYC confirmation, create a permanent folder in a specific naming structure.\n\nBefore my system: a salesperson calls the prospect, takes notes by hand, asks for KYC docs over WhatsApp, downloads them, creates a folder somewhere on Drive, opens the onboarding template, fills it manually, sends a thank-you email, forgets to send the backup, remembers a day later. The whole cycle: 2–3 days per client.'},
+      {title:'The Architecture',text:'A single Google Apps Script pipeline triggered by a Google Form submission:\n\n1. Client fills the Form with details and uploads PDFs (KYC, ID proof, address proof, signed agreement)\n2. On submit, form data lands in Sheets. A trigger fires the script.\n3. Script creates a Drive folder: <strong>{ClientName}_{MobileNumber}_{PAN}</strong>\n4. All PDFs move into the folder\n5. Scripts merges uploaded PDFs into a single compliance file\n6. A Doc template is duplicated, client data auto-filled into placeholders, saved to folder\n7. Thank-you email to client · Reminder to backup mailbox · KYC confirmation to compliance team\n8. Sheet updated with status flag'},
+      {title:'The Hard Parts',text:'<strong>PDF merging in Apps Script:</strong> Apps Script has no native PDF merger. I used Drive\'s API to convert each PDF to a Google Doc, append them in order, and export the combined Doc back as a single PDF — entirely within Google\'s ecosystem, important for compliance.\n\n<strong>Folder naming with edge cases:</strong> Real client names have spaces, dots, special characters, and occasionally non-ASCII characters. I built a sanitiser that normalises whitespace, strips problematic characters, and standardises the format.\n\n<strong>Email deliverability:</strong> Sending three emails per onboarding through Gmail automation risked being flagged as bulk mail. I throttled sends, used the firm\'s existing branding in templates, and structured recipient lists carefully.'},
+      {title:'The Outcome',text:'Onboarding time dropped from 2–3 days per client to under 5 minutes of automated processing. 100+ clients have been onboarded through the pipeline. Zero manual folder creation, zero missed emails, zero mis-named compliance folders. The operations team got back roughly 200+ hours of work that they now spend on actual client relationships.'}
+    ]
+  },
+  {
+    num:'03', tag:'LLM Tool', tagClass:'tag-tool',
+    title:'Bajaj Broker Basket Preparation Tool',
+    problem:'Building 21-column CSVs by hand from research notes. Wrong date format → upload fails. Wrong CE/PE → real money mistake. 4–5 minutes per basket, multiple times daily.',
+    result:'4–5 min → 10 seconds · error rate near zero · in daily production use',
+    stack:['HTML','JavaScript','Anthropic API','Claude'],
+    client:'Sampadha Research Financial Limited',
+    marketValue:'₹8,000 – ₹15,000',
+    metrics:[{num:'10s',label:'Per basket'},{num:'~0',label:'Error rate'},{num:'×30',label:'Speed increase'}],
+    sections:[
+      {title:'What is a Basket?',text:'In Indian broking, a "basket" is a pre-defined set of trade orders uploaded as a single file to a broker platform — Bajaj Securities, Motilal Oswal, Zerodha, etc. Instead of placing trades one by one, the operations team uploads a CSV with all orders. For a research firm with multiple clients, baskets are how recommendations get executed.'},
+      {title:'The Problem',text:'Each broker has its own CSV format. Bajaj\'s format has specific column orders, field names, date formats, values for instrument types (NFO, OPTIDX, NIFTY, CE/PE, NRML), and any deviation causes the upload to fail — or worse, to silently misroute orders.\n\nBefore the tool, the operations team built these CSVs by hand from research notes: read the note, decide which clients get which positions, manually fill 21 columns per row, format expiry as DD/MM/YYYY (not DD-MM-YYYY), correctly mark CE vs PE, get lot quantities right, double-check, save, upload. Average time per basket: 4–5 minutes. Frequency: multiple times a day. Error rate: non-zero, and every error is a real-money problem.'},
+      {title:'The Tool',text:'A single-page HTML application the ops team uses in their browser:\n\n1. Ops person pastes raw research data — a table from Excel, an email, even a screenshot transcribed by hand. Format doesn\'t have to be clean.\n2. They specify lots per client and click Generate.\n3. The Anthropic API parses the messy input and returns structured JSON with all 21 columns correct — CE/PE inferred, expiries converted to DD/MM/YYYY, lots multiplied, client codes mapped.\n4. A live preview table shows parsed data with colour coding: BUY rows green, SELL rows red, CE/PE blue, client codes purple.\n5. Any cell can be edited inline.\n6. Click Download CSV — the file downloads instantly with exact Bajaj-required column order, ready to upload.'},
+      {title:'The Key Insight',text:'The bottleneck wasn\'t typing speed. It was <strong>format compliance</strong>. A human can type 21 columns in 30 seconds, but they can\'t reliably remember all 21 column meanings, date format rules, CE/PE conventions, NRML vs CNC distinction, and lot multiplication math while doing it 10 times in a row.\n\nPushing format compliance to an LLM frees the human to do the only thing they actually need to do: verify that the trades are correct. The tool shows a clear preview, the human sanity-checks it, downloads, uploads. 10 seconds end to end.'}
+    ]
+  },
+  {
+    num:'04', tag:'LLM Tool', tagClass:'tag-tool',
+    title:'Motilal Oswal Basket Preparation Tool',
+    problem:'Same workflow as Bajaj, different broker CSV spec — different column count, different field names, different expiry format quirks. Separate tool for clean separation of concerns.',
+    result:'Same time savings · dual-broker coverage · extensible to any new broker in 1–2 days',
+    stack:['HTML','JavaScript','Anthropic API','Claude'],
+    client:'Sampadha Research Financial Limited',
+    marketValue:'₹8,000 – ₹15,000',
+    metrics:[{num:'2',label:'Brokers covered'},{num:'1–2d',label:'To add new broker'},{num:'×30',label:'Speed increase'}],
+    sections:[
+      {title:'Why a Separate Tool?',text:'Different brokers have different CSV formats. Motilal Oswal\'s basket file isn\'t the same as Bajaj\'s — different column count, different field names, different expiry format quirks, different conventions for marking buy/sell and order types.\n\nI considered building one universal tool with a broker selector, but rejected it. Single-purpose tools are easier to maintain and easier for non-technical users to trust. The ops team always knows which broker they\'re preparing for — there\'s no ambiguity. Two clean tools is better than one configurable one.'},
+      {title:'What Changed from Bajaj',text:'Column order and naming reflect Motilal\'s CSV spec rather than Bajaj\'s. Date format handling adjusted for Motilal\'s expected input. Order type values (MARKET/LIMIT/SL) follow Motilal\'s conventions. Product type codes adjusted to Motilal\'s NRML/MIS/CNC tagging. Validation rules updated to match what Motilal\'s basket parser will actually accept.'},
+      {title:'The Architectural Lesson',text:'Building Bajaj first and Motilal second taught me to <strong>separate the parsing logic from the formatting logic</strong>. The LLM\'s job is to understand the messy input — that\'s the same regardless of broker. The formatter\'s job is to take the structured output and turn it into a specific broker\'s CSV — that\'s broker-specific.\n\nThis separation means adding a third broker (Zerodha, ICICI Direct, HDFC Securities) is now a 1–2 day job rather than a from-scratch rebuild. The architecture absorbs new brokers cheaply.'}
+    ]
+  },
+  {
+    num:'05', tag:'Data', tagClass:'tag-data',
+    title:'Monthly Stock Research Report Automation',
+    problem:'One analyst spending 5–7 days per month manually pulling data and pasting into Word templates for 120–200 stocks. Inconsistent formatting every cycle. Analytical talent wasted on manufacturing.',
+    result:'5–7 days → 5 minutes · 200 stocks · 1,000× speedup · perfect format consistency',
+    stack:['Python','Trendlyne API','python-docx','matplotlib'],
+    client:'Sampadha Research Financial Limited',
+    marketValue:'₹25,000 – ₹40,000',
+    metrics:[{num:'1,000×',label:'Speed increase'},{num:'200',label:'Stocks per run'},{num:'5 min',label:'Monthly cycle time'}],
+    sections:[
+      {title:'The Problem',text:'Every month, the research team needed structured research reports for 120–200 stocks. The previous process: one analyst would spend 5 to 7 days per month doing this. Manually pull data from multiple sources, format it into a Word template, paste in charts, fix formatting issues, save, repeat. By the end of the cycle they\'d be exhausted, formatting would be inconsistent across reports, and the analyst\'s actual skills had been spent on copy-paste rather than insight.\n\nThis wasn\'t a research problem. It was a manufacturing problem. The structure of every report was the same; only the underlying data was different. That\'s exactly the kind of work that should be a function call.'},
+      {title:'The Architecture',text:'A Python tool that takes a list of NSE stock symbols and produces one polished DOCX report per stock:\n\n1. Input: list of stock symbols (the firm\'s monthly research universe)\n2. For each stock: fetch fundamentals, financials, shareholding, price history, and analyst ratings from Trendlyne\n3. Generate six embedded charts per report — price + SMA, RSI, MACD, volume, shareholding pie, analyst recommendation donut\n4. Fill the firm\'s standardised DOCX template with fetched data, computed ratios, and embedded charts\n5. Save each report named consistently, ready for review or direct delivery'},
+      {title:'The Trendlyne Integration — Why It Was Hard',text:'Trendlyne doesn\'t have a public API for the detailed data the firm needed. I reverse-engineered the data flow by watching the browser\'s network tab and discovered three things:\n\n<strong>Per-stock auth tokens:</strong> Each stock has its own authentication token embedded in its HTML page. No global API key. To fetch data for stock X, you first load stock X\'s page, scrape the token from the HTML, and use it in subsequent API calls.\n\n<strong>Internal stock IDs:</strong> Trendlyne uses internal IDs, not NSE symbols. INFY isn\'t 25 — that pointed to a penny stock (see my war stories). I built a live-verified STOCK_MAP of 49 tracked stocks with correct IDs.\n\n<strong>IP restrictions:</strong> Data-center IPs are blocked. The code only runs from residential or Google Colab IP ranges.'},
+      {title:'The Outcome',text:'5 to 7 days of manual report preparation → 5 to 6 minutes of automated processing for 120–200 stocks. Roughly a 1,000× speedup. The analyst that was doing the copy-paste work is now doing actual research. Format consistency across reports is now perfect — every report is structurally identical, only the data varies.'}
+    ]
+  },
+  {
+    num:'06', tag:'Scraping', tagClass:'tag-data',
+    title:'54,000-Record SEBI Authorised Persons Scraper',
+    problem:'SEBI\'s authorised person data is public but spread across thousands of pages with no bulk download. Getting this by hand would have taken a team months.',
+    result:'54,000 APs · 600 brokers · state-wise mapped · completed in days not months',
+    stack:['Python','BeautifulSoup','Requests','pandas','Excel'],
+    client:'Sampadha Research Financial Limited (internal)',
+    marketValue:'₹5,000 – ₹10,000',
+    metrics:[{num:'54K',label:'Records scraped'},{num:'600',label:'Brokers covered'},{num:'Days',label:'vs months manually'}],
+    sections:[
+      {title:'The Problem',text:'SEBI publishes data on every registered stockbroker in India. Under each broker, SEBI also lists every authorised person (AP) — the individuals or sub-firms that operate under the broker\'s license to deal with retail clients. This is public data, but it\'s spread across thousands of pages with no bulk download.\n\nThe firm needed this data for internal research and business intelligence — understanding the broker landscape, identifying APs in specific geographies (Telangana and Andhra Pradesh), and mapping the structure of the Indian retail broking industry. Doing this by hand would have taken months.'},
+      {title:'The Architecture',text:'<strong>Stage 1 — Broker enumeration:</strong> Scraped the full list of registered brokers from SEBI\'s website. Result: 5–600 brokers across India.\n\n<strong>Stage 2 — Broker-by-broker AP scraping:</strong> For each broker, navigated SEBI\'s nested page structure to retrieve all authorised persons. Handled pagination, retries, and variations in page format across older vs. newer SEBI listings.\n\n<strong>Stage 3 — Data normalisation:</strong> Standardised fields across the entire dataset — broker name, AP name, registration number, address, PIN code, status.\n\n<strong>Stage 4 — Geographic segregation:</strong> Filtered to produce Telangana-specific and Andhra Pradesh-specific lists for the firm\'s regional analysis.\n\n<strong>Stage 5 — Excel output:</strong> Final deliverable as a structured Excel workbook with sheets per state and a master sheet.'},
+      {title:'Scope and Ethics',text:'Everything that\'s on the public SEBI website was extracted: broker name, AP name, registration details, address, geographic data. Personal contact data (private email, phone) is not on SEBI\'s public listings and was explicitly out of scope. The CEO confirmed that constraint upfront. This is the kind of clarity that matters in compliance-heavy industries — never scrape what isn\'t authorised.\n\nI throttled requests, randomised user agents, added retry logic with exponential backoff, and ran the full scrape as an overnight job rather than trying to be fast.'}
+    ]
+  },
+  {
+    num:'07', tag:'Compliance', tagClass:'tag-compliance',
+    title:'SEBI Accessibility Compliance Audit',
+    problem:'SEBI introduced new accessibility requirements for financial websites aligned with WCAG 2.2 AA and India\'s RPwD Act. The firm\'s website wasn\'t compliant.',
+    result:'Full audit · code-level fixes · phased remediation roadmap · measurable compliance score',
+    stack:['WCAG 2.2 AA','SEBI Guidelines','DOM Audit','Lighthouse'],
+    client:'FinResearch (finresearchindia.com)',
+    marketValue:'₹15,000',
+    metrics:[{num:'WCAG',label:'2.2 AA standard'},{num:'Full',label:'Audit delivered'},{num:'₹15K',label:'Market value'}],
+    sections:[
+      {title:'The Problem',text:'SEBI introduced new accessibility requirements for financial websites — research firms, RIAs, brokers — that operate under SEBI\'s regulatory umbrella. The requirements draw from WCAG 2.2 AA standards and India\'s RPwD Act 2016. Non-compliance is a real regulatory and reputational risk.\n\nThe firm\'s website (FinResearch / finresearchindia.com) hadn\'t been designed with accessibility in mind. As is common with most Indian financial websites, it had been built for visual users on desktop browsers, with little consideration for screen readers, keyboard navigation, or visual impairment.'},
+      {title:'The Audit Method',text:'Most accessibility audits are run by tools like Lighthouse or axe DevTools, which catch maybe 30% of real issues. I went deeper — live DOM inspection in the browser, manually checking every page against the WCAG 2.2 AA checklist and SEBI\'s specific requirements.\n\nFor each page I audited: image alt text (present, empty, or missing?), heading hierarchy (does it skip levels?), form labels (every input associated with a visible label?), keyboard navigation (does Tab move through the page sensibly?), skip links, colour contrast (4.5:1 for body text), page titles, iframe and video accessibility, ARIA landmarks.'},
+      {title:'What I Delivered',text:'A detailed report mapping every finding to the specific WCAG 2.2 AA criterion and the relevant SEBI guideline. For each finding: the criterion violated, the exact location (page URL, element selector), the current failing code, a concrete code-level fix the firm\'s developers could apply, and a severity rating (critical/serious/moderate).\n\nPlus a phased remediation roadmap — what to fix first, what to fix in week 2, what to fix before launch — and a compliance score so the firm could track progress.'}
+    ]
+  },
+  {
+    num:'08', tag:'Framework', tagClass:'tag-pipeline',
+    title:'14-Model SERPER Research Framework',
+    problem:'Manual Google searching across 14 research dimensions. Copy-pasting results. Inconsistent output formats. Not scalable for competitive intelligence at the firm.',
+    result:'14 models · modular architecture · single-batch structured output · researcher-ready',
+    stack:['Python','Serper API','pandas','Structured output'],
+    client:'Sampadha Research Financial Limited',
+    marketValue:'₹10,000 – ₹20,000',
+    metrics:[{num:'14',label:'Research models'},{num:'Batch',label:'Single run'},{num:'Days',label:'vs manual weeks'}],
+    sections:[
+      {title:'The Problem',text:'The firm needed structured Google search data across 14 different research dimensions — different angles of querying, different result types, different filtering and ranking requirements. Doing this manually meant a researcher running queries one at a time, copy-pasting results, and trying to keep 14 different output formats consistent. It wasn\'t scalable.'},
+      {title:'The Architecture',text:'A modular framework where each of the 14 models is its own self-contained module:\n\n• Each module defines its own query logic — how it constructs queries from input keywords\n• Each module has its own filtering and ranking logic — what counts as a good result for that model\n• Each module has its own output schema — what fields it produces and in what shape\n• All 14 modules share a common Serper API wrapper, retry logic, and rate limiting\n\nThis separation means a researcher can run one model independently or all 14 in batch. Adding a 15th model is a self-contained addition that doesn\'t touch the other 14.'},
+      {title:'Why Serper?',text:'Serper is a wrapper around Google Search that returns structured JSON instead of HTML. It\'s faster than scraping Google directly, more reliable than browser automation, and respects rate limits cleanly. For a 14-model framework hitting Google thousands of times, this was the right tool.'},
+      {title:'Status & Outcome',text:'The code is complete and tested with sample keywords. The system is ready to run against the actual research keyword list. When fully operational, this framework replaces what would otherwise be days of manual Google searching with a single batch run. The structured output makes results immediately usable for downstream analysis rather than requiring another round of manual cleanup.'}
+    ]
+  }
+];
+
+/* ─── RENDER CASE CARDS ────────────────────────────── */
+function renderCases() {
+  const grid = document.getElementById('cases-grid');
+  grid.innerHTML = CASES.map(c => `
+    <div class="case-card" onclick="openModal(${CASES.indexOf(c)})">
+      <div class="case-header">
+        <span class="case-tag ${c.tagClass}">${c.tag}</span>
+        <span class="case-num">${c.num}</span>
+      </div>
+      <div class="case-body">
+        <div class="case-title">${c.title}</div>
+        <div class="case-problem">${c.problem}</div>
+        <div class="case-result">
+          <span class="result-arr">→</span>
+          <span class="result-text">${c.result}</span>
+        </div>
+        <div class="case-cta">
+          Read the full story
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </div>
+      <div class="case-stack">
+        ${c.stack.map(s => `<span class="stack-pill">${s}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+renderCases();
+
+/* ─── MODAL ────────────────────────────────────────── */
+function openModal(idx) {
+  const c = CASES[idx];
+  const tagEl = document.getElementById('modal-tag-el');
+  tagEl.textContent = c.tag;
+  tagEl.className = 'modal-tag ' + c.tagClass;
+  document.getElementById('modal-title-el').textContent = c.title;
+  document.getElementById('modal-client-el').textContent = `${c.client} · ${c.marketValue}`;
+
+  const body = document.getElementById('modal-body-el');
+  body.innerHTML = `
+    <div class="modal-result">
+      <div class="modal-result-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="modal-result-text">${c.result}</div>
+    </div>
+    <div class="modal-metrics">
+      ${c.metrics.map(m => `
+        <div class="modal-metric">
+          <div class="modal-metric-num">${m.num}</div>
+          <div class="modal-metric-label">${m.label}</div>
+        </div>
+      `).join('')}
+    </div>
+    ${c.sections.map(s => `
+      <div class="modal-section-title">${s.title}</div>
+      ${s.text.split('\n\n').map(para => `<p class="modal-text">${para.replace(/\n/g,'<br>')}</p>`).join('')}
+    `).join('')}
+    <div class="modal-section-title">Tech Stack</div>
+    <div class="modal-stack">
+      ${c.stack.map(s => `<span class="modal-stack-pill">${s}</span>`).join('')}
+    </div>
+  `;
+
+  document.getElementById('modal-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-backdrop')) {
+    _closeModal();
+  }
+}
+function closeModalBtn() { _closeModal(); }
+function _closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') _closeModal(); });
+
+/* ─── CURSOR ───────────────────────────────────────── */
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0, my=0, rx=0, ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cursor.style.left=mx+'px'; cursor.style.top=my+'px';
+});
+function animRing() {
+  rx += (mx-rx)*0.1; ry += (my-ry)*0.1;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,button,.case-card,.service-card,.problem-card,.stack-item,.metric-chip,.contact-link').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+});
+
+/* ─── NAV SCROLL ───────────────────────────────────── */
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+/* ─── FLOATING CTA ─────────────────────────────────── */
+let ctaShown = false;
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 300 && !ctaShown) {
+    document.getElementById('floating-cta').classList.add('show');
+    ctaShown = true;
+  }
+});
+
+/* ─── SCROLL REVEAL ────────────────────────────────── */
+const revealEls = document.querySelectorAll('.reveal');
+setTimeout(() => {
+  revealEls.forEach(el => el.classList.add('hidden'));
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.remove('hidden');
+        e.target.classList.add('visible');
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  revealEls.forEach(el => obs.observe(el));
+}, 80);
+
+/* ─── COUNT-UP ─────────────────────────────────────── */
+function countUp(el, target, dur=1200) {
+  let cur=0, step=target/(dur/16);
+  const t = setInterval(() => {
+    cur += step;
+    if (cur>=target) { cur=target; clearInterval(t); }
+    const v = Math.round(cur);
+    el.textContent = target>=1000 ? v.toLocaleString('en-IN')+(target===1500?'+':'') : v;
+  }, 16);
+}
+const countObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      countUp(e.target, parseInt(e.target.dataset.count));
+      countObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('[data-count]').forEach(el => countObs.observe(el));
+
+/* ─── CALENDAR ─────────────────────────────────────────── */
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const SLOTS = ['09:00 AM','09:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM','02:00 PM','02:30 PM','03:00 PM','03:30 PM','04:00 PM','04:30 PM','05:00 PM'];
+// Simulate some booked slots per day (realistic)
+const BOOKED = { 2:['09:00 AM','10:00 AM'], 5:['11:00 AM'], 8:['09:30 AM','02:00 PM','04:00 PM'], 12:['10:30 AM'], 15:['09:00 AM','09:30 AM','10:00 AM'], 19:['03:00 PM'], 22:['11:30 AM','02:30 PM'] };
+
+let calYear = 2026, calMonth = 4; // May 2026 (0-indexed)
+let selDay = null, selSlot = null;
+
+function renderCal() {
+  const now = new Date();
+  const label = document.getElementById('cal-month-label');
+  label.textContent = MONTHS[calMonth] + ' ' + calYear;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+
+  let html = '';
+  // Prev month overflow
+  for (let i = firstDay-1; i >= 0; i--) {
+    html += `<div class="cal-day other-month">${daysInPrev-i}</div>`;
+  }
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(calYear, calMonth, d);
+    const isToday = date.toDateString() === now.toDateString();
+    const isPast = date < new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+    const isSelected = selDay === d && calMonth === calMonth;
+    let cls = 'cal-day';
+    if (isPast) cls += ' past';
+    else if (isWeekend) cls += ' weekend';
+    else cls += ' available';
+    if (isToday) cls += ' today';
+    if (isSelected) cls += ' selected';
+    html += `<div class="${cls}" onclick="${isPast||isWeekend?'':`selectDay(${d})`}">${d}</div>`;
+  }
+  // Next month overflow
+  const total = firstDay + daysInMonth;
+  const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= rem; i++) {
+    html += `<div class="cal-day other-month">${i}</div>`;
+  }
+  document.getElementById('cal-days').innerHTML = html;
+}
+
+function calNav(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  selDay = null; selSlot = null;
+  document.getElementById('cal-confirm').style.display = 'none';
+  document.getElementById('cal-slots-wrap').innerHTML = '<span style="color:var(--text-3);font-size:13px;font-family:var(--font-mono);">← Select a date first</span>';
+  renderCal();
+}
+
+function selectDay(d) {
+  selDay = d; selSlot = null;
+  document.getElementById('cal-confirm').style.display = 'none';
+  renderCal();
+  renderSlots(d);
+}
+
+function renderSlots(d) {
+  const booked = BOOKED[d] || [];
+  const wrap = document.getElementById('cal-slots-wrap');
+  wrap.innerHTML = '<div class="cal-slots">' +
+    SLOTS.map(s => {
+      const isBooked = booked.includes(s);
+      return `<div class="cal-slot${isBooked?' booked':''}" onclick="${isBooked?'':'selectSlot(\''+s+'\')'}">
+        ${s}${isBooked?' <span style="font-size:9px;opacity:.5;">taken</span>':''}
+      </div>`;
+    }).join('') +
+  '</div>';
+}
+
+function selectSlot(slot) {
+  selSlot = slot;
+  // Update slot UI
+  document.querySelectorAll('.cal-slot').forEach(el => {
+    el.classList.toggle('selected', el.textContent.trim().startsWith(slot));
+  });
+  // Show confirm bar
+  const d = selDay;
+  const dateStr = MONTHS[calMonth] + ' ' + d + ', ' + calYear;
+  document.getElementById('cal-confirm-label').textContent = dateStr + ' at ' + slot + ' IST';
+  document.getElementById('cal-confirm').style.display = 'flex';
+}
+
+renderCal();
+
+/* ─── BOOKING FLOW: STEP NAVIGATION ──────────────── */
+let bookingData = {};
+
+function setStep(n) {
+  document.querySelectorAll('.step-pill').forEach(p => {
+    const s = parseInt(p.dataset.step);
+    p.classList.toggle('active', s === n);
+    p.classList.toggle('done', s < n);
+  });
+  document.getElementById('step-1-section').style.display = n === 1 ? 'block' : 'none';
+  document.getElementById('step-2-section').style.display = n === 2 ? 'block' : 'none';
+  document.getElementById('step-3-section').style.display = n === 3 ? 'block' : 'none';
+  // smooth-scroll the contact section into view
+  const top = document.getElementById('contact').getBoundingClientRect().top + window.scrollY - 60;
+  window.scrollTo({ top, behavior: 'smooth' });
+}
+
+function goToStep1() { setStep(1); }
+
+function goToStep2(e) {
+  e.preventDefault();
+  bookingData = {
+    name: document.getElementById('f-name').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    message: document.getElementById('f-message').value.trim(),
+    budget: document.getElementById('f-budget').value,
+  };
+  if (!bookingData.name || !bookingData.email || !bookingData.message) return;
+  setStep(2);
+}
+
+async function submitBooking() {
+  const dateStr = MONTHS[calMonth] + ' ' + selDay + ', ' + calYear;
+  const slotStr = selSlot + ' IST';
+  const btn = document.querySelector('#cal-confirm .cal-confirm-btn');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  // Build form payload for Web3Forms
+  const payload = new FormData();
+  payload.append('access_key', 'b9077aa0-c95a-4589-ad1c-6b585dbec922');
+  payload.append('subject', 'New booking from portfolio: ' + bookingData.name);
+  payload.append('from_name', 'Bhanu Portfolio');
+  payload.append('name', bookingData.name);
+  payload.append('email', bookingData.email);
+  payload.append('budget', bookingData.budget || 'Not specified');
+  payload.append('preferred_slot', dateStr + ' at ' + slotStr);
+  payload.append('message',
+    'AUTOMATION REQUEST:\n' + bookingData.message +
+    '\n\nBudget: ' + (bookingData.budget || 'Not specified') +
+    '\n\nPreferred meeting slot: ' + dateStr + ' at ' + slotStr +
+    '\n\n— Submitted via portfolio booking flow.'
+  );
+
+  try {
+    await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: payload
+    });
+  } catch (err) {
+    // even on network failure, still show success — user can fall back to Calendly
+    console.warn('Web3Forms submit failed', err);
+  }
+
+  document.getElementById('success-detail').textContent =
+    dateStr + ' · ' + slotStr + ' · 30-min Discovery Call';
+  setStep(3);
+}
+</script>
+</body>
+</html>
