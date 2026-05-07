@@ -59,6 +59,66 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
+/* ─── VIDEO BACKGROUND ──────────────────────────────── */
+.hero-video-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.hero-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  transform: translate(-50%, -50%);
+  object-fit: cover;
+  opacity: 0.6;  /* 🔧 CHANGE: 0.3 → 0.6 or 0.7 */
+  pointer-events: none;
+}
+
+/* Video overlay for text readability */
+.hero-video-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(
+      ellipse at 70% 50%,
+      rgba(25, 27, 24, 0.2) 0%,      /* 🔧 CHANGE: 0.5 → 0.2 */
+      rgba(25, 27, 24, 0.5) 70%      /* 🔧 CHANGE: 0.85 → 0.5 */
+    ),
+    linear-gradient(
+      180deg,
+      rgba(25, 27, 24, 0.6) 0%,      /* 🔧 CHANGE: 0.9 → 0.6 */
+      rgba(25, 27, 24, 0.3) 50%,     /* 🔧 CHANGE: 0.6 → 0.3 */
+      rgba(25, 27, 24, 0.6) 100%     /* 🔧 CHANGE: 0.9 → 0.6 */
+    );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Video poster fallback */
+.hero-video-poster {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  display: none;
+}
+
 /* ─── CURSOR ─────────────────────────────────────────── */
 #cursor{
   position:fixed;width:8px;height:8px;
@@ -122,13 +182,18 @@ nav.scrolled{
 
 /* ─── HERO ───────────────────────────────────────────── */
 .hero{
-  position:relative;min-height:100vh;
-  display:grid;grid-template-columns:1fr 420px;
-  align-items:center;gap:48px;
+  position:relative;
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:1fr 420px;
+  align-items:center;
+  gap:48px;
   padding:120px 56px 80px;
-  max-width:1360px;margin:0 auto;z-index:2;
+  max-width:1360px;
+  margin:0 auto;
+  z-index:2;
 }
-.hero-left{}
+.hero-left{position:relative;z-index:2;}
 .hero-avail{
   display:inline-flex;align-items:center;gap:8px;
   padding:5px 14px 5px 10px;border-radius:20px;
@@ -205,7 +270,7 @@ nav.scrolled{
 }
 
 /* HERO RIGHT — TERMINAL */
-.hero-right{}
+.hero-right{position:relative;z-index:2;}
 .terminal{
   background:var(--surface);border:1px solid var(--border-2);
   border-radius:var(--radius-lg);overflow:hidden;
@@ -564,8 +629,6 @@ nav.scrolled{
   background:linear-gradient(135deg,var(--surface) 0%,var(--surface-2) 100%);
   border:1px solid var(--border);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-    
-
 }
 .photo-caption{font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);text-align:center;line-height:1.7;}
 .about-badge{
@@ -817,6 +880,8 @@ footer{
 
 /* ─── RESPONSIVE ─────────────────────────────────────── */
 @media(max-width:1024px){
+  .hero-video-wrapper{display:none;}
+  .hero-video-overlay{display:none;}
   .hero{grid-template-columns:1fr;padding:100px 28px 60px;}
   .hero-right{display:none;}
   .section{padding:64px 28px;}
@@ -829,6 +894,8 @@ footer{
   footer{flex-direction:column;gap:14px;text-align:center;padding:28px 24px;}
 }
 @media(max-width:768px){
+  .hero-video-wrapper{display:none;}
+  .hero-video-overlay{display:none;}
   /* Hide desktop-only chrome */
   #cursor,#cursor-ring{display:none !important;}
   body{cursor:auto !important;}
@@ -916,7 +983,6 @@ footer{
   <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
     <rect width="1200" height="800" fill="#0F1410"/>
     <g transform="translate(360, 240)">
-      <!-- Stylized "B" monogram in olive accent -->
       <rect x="0" y="0" width="14" height="320" fill="#A3B570"/>
       <path d="M14 0 L160 0 Q230 0 230 80 Q230 130 180 155 Q240 175 240 240 Q240 320 160 320 L14 320 Z M40 28 L40 140 L160 140 Q200 140 200 84 Q200 28 160 28 Z M40 168 L40 292 L160 292 Q210 292 210 230 Q210 168 160 168 Z" fill="#A3B570"/>
       <circle cx="270" cy="304" r="10" fill="#A3B570"/>
@@ -949,6 +1015,34 @@ footer{
 
 <!-- HERO -->
 <div class="hero">
+  <!-- VIDEO BACKGROUND -->
+  <div class="hero-video-wrapper">
+    <!-- 
+      ═══════════════════════════════════════════════════════════
+      REPLACE THE src BELOW WITH YOUR VIDEO LINK
+      ═══════════════════════════════════════════════════════════
+      Current placeholder: VIDEO_URL_HERE
+      Replace with your actual .mp4 or .webm video URL
+      Example: src="https://example.com/your-video.mp4"
+      ═══════════════════════════════════════════════════════════
+    -->
+    <video 
+      class="hero-video" 
+      autoplay 
+      muted 
+      loop 
+      playsinline 
+      preload="auto"
+      poster=""
+    >
+      <source src="C:\Users\conte\Downloads\Enjoy_your_video_.mp4" type="video/mp4">
+      <!-- Add WebM fallback if available -->
+      <!-- <source src="VIDEO_URL_HERE" type="video/webm"> -->
+      Your browser does not support the video tag.
+    </video>
+    <div class="hero-video-overlay"></div>
+  </div>
+
   <div class="hero-left">
     <div class="hero-avail">
       <span class="avail-dot"></span>
@@ -1271,7 +1365,7 @@ footer{
   <div class="section-tag">About</div>
   <div class="about-grid">
     <div class="about-photo-box reveal">
-<img src="Bhanu.jpeg" alt="Bhanu Prakash" class="about-photo-real">   
+      <img src="Bhanu.jpeg" alt="Bhanu Prakash" class="about-photo-real">   
       <div class="about-badge">
         <strong>🟢 Available</strong>
         Freelance · Contract · Consulting<br>
@@ -1323,6 +1417,18 @@ footer{
       <div class="form-group" style="margin-top:14px;">
         <label class="form-label">What do you want to automate? *</label>
         <textarea name="message" id="f-message" class="form-textarea" rows="4" placeholder="Describe the manual process — what happens now, how long it takes, who does it..." required></textarea>
+      </div>
+      <div class="form-group" style="margin-top:14px;">
+        <label class="form-label">Budget range</label>
+        <select name="budget" id="f-budget" class="form-select">
+          <option value="">Select a range</option>
+          <option>₹15K – ₹40K (small tool)</option>
+          <option>₹40K – ₹1L (medium project)</option>
+          <option>₹1L – ₹2.5L (full platform)</option>
+          <option>₹50K+/month (retainer)</option>
+          <option>Advisory / consulting only</option>
+        </select>
+      </div>
       <button type="submit" class="form-submit" style="margin-top:18px;">Continue to pick a time →</button>
     </form>
   </div>
@@ -1330,7 +1436,6 @@ footer{
   <!-- STEP 2: CALENDAR -->
   <div class="cal-section reveal" id="step-2-section" style="display:none;">
     <div style="display:flex;align-items:flex-start;gap:48px;flex-wrap:wrap;">
-      <!-- Left: calendar grid -->
       <div style="flex:1.2;min-width:280px;">
         <div style="font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Step 1 — Pick a date</div>
         <div class="cal-header">
@@ -1352,7 +1457,6 @@ footer{
         </div>
         <div class="cal-days" id="cal-days"></div>
       </div>
-      <!-- Right: time slots -->
       <div style="flex:1;min-width:220px;padding-top:36px;">
         <div style="font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;">Step 2 — Pick a time (IST)</div>
         <div id="cal-slots-wrap" style="color:var(--text-3);font-size:13px;font-family:var(--font-mono);padding:12px 0;">← Select a date first</div>
@@ -1388,47 +1492,46 @@ footer{
   <div class="reveal" style="margin-top:64px;">
     <div class="section-tag" style="margin-bottom:14px;">Or reach out directly</div>
     <div class="contact-links-grid">
-        <a href="https://wa.me/917036121131?text=Hi+Bhanu" class="contact-link" target="_blank">
-          <div class="contact-link-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </div>
-          <div class="contact-link-text">
-            <div class="contact-link-label">WhatsApp</div>
-            <div class="contact-link-value">Message me directly</div>
-          </div>
-          <div class="contact-link-arr">↗</div>
-        </a>
-        <a href="mailto:avaduthabhanuprakash1@gmail.com" class="contact-link">
-          <div class="contact-link-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          </div>
-          <div class="contact-link-text">
-            <div class="contact-link-label">Email</div>
-            <div class="contact-link-value">avaduthabhanuprakash1@gmail.com</div>
-          </div>
-          <div class="contact-link-arr">↗</div>
-        </a>
-        <a href="https://www.linkedin.com/in/bhanuprakash-avadutha/" class="contact-link" target="_blank">
-          <div class="contact-link-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-          </div>
-          <div class="contact-link-text">
-            <div class="contact-link-label">LinkedIn</div>
-            <div class="contact-link-value">linkedin.com/in/bhanuprakash-avadutha</div>
-          </div>
-          <div class="contact-link-arr">↗</div>
-        </a>
-        <a href="https://github.com/BhanuprakashAvadutha" class="contact-link" target="_blank">
-          <div class="contact-link-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-          </div>
-          <div class="contact-link-text">
-            <div class="contact-link-label">GitHub</div>
-            <div class="contact-link-value">github.com/BhanuprakashAvadutha</div>
-          </div>
-          <div class="contact-link-arr">↗</div>
-        </a>
-      </div>
+      <a href="https://wa.me/917036121131?text=Hi+Bhanu" class="contact-link" target="_blank">
+        <div class="contact-link-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="contact-link-text">
+          <div class="contact-link-label">WhatsApp</div>
+          <div class="contact-link-value">Message me directly</div>
+        </div>
+        <div class="contact-link-arr">↗</div>
+      </a>
+      <a href="mailto:avaduthabhanuprakash1@gmail.com" class="contact-link">
+        <div class="contact-link-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <div class="contact-link-text">
+          <div class="contact-link-label">Email</div>
+          <div class="contact-link-value">avaduthabhanuprakash1@gmail.com</div>
+        </div>
+        <div class="contact-link-arr">↗</div>
+      </a>
+      <a href="https://www.linkedin.com/in/bhanuprakash-avadutha/" class="contact-link" target="_blank">
+        <div class="contact-link-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </div>
+        <div class="contact-link-text">
+          <div class="contact-link-label">LinkedIn</div>
+          <div class="contact-link-value">linkedin.com/in/bhanuprakash-avadutha</div>
+        </div>
+        <div class="contact-link-arr">↗</div>
+      </a>
+      <a href="https://github.com/BhanuprakashAvadutha" class="contact-link" target="_blank">
+        <div class="contact-link-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+        </div>
+        <div class="contact-link-text">
+          <div class="contact-link-label">GitHub</div>
+          <div class="contact-link-value">github.com/BhanuprakashAvadutha</div>
+        </div>
+        <div class="contact-link-arr">↗</div>
+      </a>
     </div>
   </div>
 </section>
@@ -1489,7 +1592,6 @@ function TweaksApp() {
   React.useEffect(() => {
     if (!tweaks) return;
     document.documentElement.style.setProperty('--accent', tweaks.accentColor);
-    // derive lighter shade
     document.documentElement.style.setProperty('--accent-lt', tweaks.accentColor);
     document.documentElement.style.setProperty('--bg', tweaks.bgColor);
     document.documentElement.style.setProperty('--bg-raised', tweaks.bgColor);
@@ -1506,16 +1608,16 @@ function TweaksApp() {
 
   return (
     <TweaksPanel title="Tweaks">
-      <TweakSection label="Brand">
-        <TweakColor label="Accent Color" value={tweaks.accentColor} onChange={v => setTweak('accentColor', v)} />
-        <TweakColor label="Background" value={tweaks.bgColor} onChange={v => setTweak('bgColor', v)} />
-      </TweakSection>
-      <TweakSection label="Hero">
-        <TweakToggle label="Show Terminal" value={tweaks.showTerminal} onChange={v => setTweak('showTerminal', v)} />
-      </TweakSection>
-      <TweakSection label="UI">
-        <TweakToggle label="Floating CTA" value={tweaks.showFloatingCTA} onChange={v => setTweak('showFloatingCTA', v)} />
-      </TweakSection>
+      <TweaksSection label="Brand">
+        <TweaksColor label="Accent Color" value={tweaks.accentColor} onChange={v => setTweaks('accentColor', v)} />
+        <TweaksColor label="Background" value={tweaks.bgColor} onChange={v => setTweaks('bgColor', v)} />
+      </TweaksSection>
+      <TweaksSection label="Hero">
+        <TweaksToggle label="Show Terminal" value={tweaks.showTerminal} onChange={v => setTweaks('showTerminal', v)} />
+      </TweaksSection>
+      <TweaksSection label="UI">
+        <TweaksToggle label="Floating CTA" value={tweaks.showFloatingCTA} onChange={v => setTweaks('showFloatingCTA', v)} />
+      </TweaksSection>
     </TweaksPanel>
   );
 }
@@ -1807,7 +1909,6 @@ document.querySelectorAll('[data-count]').forEach(el => countObs.observe(el));
 /* ─── CALENDAR ─────────────────────────────────────────── */
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SLOTS = ['09:00 AM','09:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM','02:00 PM','02:30 PM','03:00 PM','03:30 PM','04:00 PM','04:30 PM','05:00 PM'];
-// Simulate some booked slots per day (realistic)
 const BOOKED = { 2:['09:00 AM','10:00 AM'], 5:['11:00 AM'], 8:['09:30 AM','02:00 PM','04:00 PM'], 12:['10:30 AM'], 15:['09:00 AM','09:30 AM','10:00 AM'], 19:['03:00 PM'], 22:['11:30 AM','02:30 PM'] };
 
 let calYear = 2026, calMonth = 4; // May 2026 (0-indexed)
@@ -1823,11 +1924,9 @@ function renderCal() {
   const daysInPrev = new Date(calYear, calMonth, 0).getDate();
 
   let html = '';
-  // Prev month overflow
   for (let i = firstDay-1; i >= 0; i--) {
     html += `<div class="cal-day other-month">${daysInPrev-i}</div>`;
   }
-  // Current month
   for (let d = 1; d <= daysInMonth; d++) {
     const date = new Date(calYear, calMonth, d);
     const isToday = date.toDateString() === now.toDateString();
@@ -1842,7 +1941,6 @@ function renderCal() {
     if (isSelected) cls += ' selected';
     html += `<div class="${cls}" onclick="${isPast||isWeekend?'':`selectDay(${d})`}">${d}</div>`;
   }
-  // Next month overflow
   const total = firstDay + daysInMonth;
   const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
   for (let i = 1; i <= rem; i++) {
@@ -1883,11 +1981,9 @@ function renderSlots(d) {
 
 function selectSlot(slot) {
   selSlot = slot;
-  // Update slot UI
   document.querySelectorAll('.cal-slot').forEach(el => {
     el.classList.toggle('selected', el.textContent.trim().startsWith(slot));
   });
-  // Show confirm bar
   const d = selDay;
   const dateStr = MONTHS[calMonth] + ' ' + d + ', ' + calYear;
   document.getElementById('cal-confirm-label').textContent = dateStr + ' at ' + slot + ' IST';
@@ -1908,7 +2004,6 @@ function setStep(n) {
   document.getElementById('step-1-section').style.display = n === 1 ? 'block' : 'none';
   document.getElementById('step-2-section').style.display = n === 2 ? 'block' : 'none';
   document.getElementById('step-3-section').style.display = n === 3 ? 'block' : 'none';
-  // smooth-scroll the contact section into view
   const top = document.getElementById('contact').getBoundingClientRect().top + window.scrollY - 60;
   window.scrollTo({ top, behavior: 'smooth' });
 }
@@ -1934,7 +2029,6 @@ async function submitBooking() {
   btn.textContent = 'Sending...';
   btn.disabled = true;
 
-  // Build form payload for Web3Forms
   const payload = new FormData();
   payload.append('access_key', 'b9077aa0-c95a-4589-ad1c-6b585dbec922');
   payload.append('subject', 'New booking from portfolio: ' + bookingData.name);
@@ -1956,7 +2050,6 @@ async function submitBooking() {
       body: payload
     });
   } catch (err) {
-    // even on network failure, still show success — user can fall back to Calendly
     console.warn('Web3Forms submit failed', err);
   }
 
