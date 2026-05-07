@@ -62,49 +62,59 @@ body{
 /* ─── VIDEO BACKGROUND ──────────────────────────────── */
 .hero-video-wrapper {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
   z-index: 0;
+  background: var(--bg);
 }
 
 .hero-video {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  opacity: 0.6;  /* 🔧 CHANGE: 0.3 → 0.6 or 0.7 */
+  object-position: center;
+  opacity: 0.55;
   pointer-events: none;
 }
 
 /* Video overlay for text readability */
 .hero-video-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
+  inset: 0;
   width: 100%;
   height: 100%;
-  background: 
+  background:
     radial-gradient(
       ellipse at 70% 50%,
-      rgba(25, 27, 24, 0.2) 0%,      /* 🔧 CHANGE: 0.5 → 0.2 */
-      rgba(25, 27, 24, 0.5) 70%      /* 🔧 CHANGE: 0.85 → 0.5 */
+      rgba(25, 27, 24, 0.25) 0%,
+      rgba(25, 27, 24, 0.55) 70%
     ),
     linear-gradient(
       180deg,
-      rgba(25, 27, 24, 0.6) 0%,      /* 🔧 CHANGE: 0.9 → 0.6 */
-      rgba(25, 27, 24, 0.3) 50%,     /* 🔧 CHANGE: 0.6 → 0.3 */
-      rgba(25, 27, 24, 0.6) 100%     /* 🔧 CHANGE: 0.9 → 0.6 */
+      rgba(25, 27, 24, 0.65) 0%,
+      rgba(25, 27, 24, 0.35) 50%,
+      rgba(25, 27, 24, 0.7) 100%
     );
   z-index: 1;
   pointer-events: none;
+}
+
+/* On mobile/portrait, darken slightly more so text stays readable */
+@media (max-width: 768px) {
+  .hero-video { opacity: 0.4; }
+  .hero-video-overlay {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(25, 27, 24, 0.55) 0%,
+        rgba(25, 27, 24, 0.65) 60%,
+        rgba(25, 27, 24, 0.85) 100%
+      );
+  }
 }
 
 /* Video poster fallback */
@@ -121,20 +131,32 @@ body{
 
 /* ─── CURSOR ─────────────────────────────────────────── */
 #cursor{
-  position:fixed;width:8px;height:8px;
+  position:fixed;width:10px;height:10px;
   background:var(--accent-lt);border-radius:50%;
   pointer-events:none;z-index:9999;
   transform:translate(-50%,-50%);
-  transition:width .18s,height .18s,background .18s;
+  transition:width .18s ease,height .18s ease,background .18s ease,box-shadow .18s ease;
   mix-blend-mode:normal;
+  box-shadow:0 0 8px rgba(154,173,105,0.3);
 }
-#cursor.grow{width:40px;height:40px;background:var(--accent-glow);border-radius:50%;}
+/* on hover: dot grows to match ring size → they merge into one solid circle */
+#cursor.grow{
+  width:22px;height:22px;
+  background:rgba(154,173,105,0.22);
+  box-shadow:0 0 0 1.5px rgba(154,173,105,0.6),0 0 14px rgba(154,173,105,0.2);
+}
 #cursor-ring{
-  position:fixed;width:32px;height:32px;
-  border:1px solid rgba(120,137,82,0.4);border-radius:50%;
+  position:fixed;width:22px;height:22px;
+  border:1.5px solid rgba(120,137,82,0.4);border-radius:50%;
   pointer-events:none;z-index:9998;
   transform:translate(-50%,-50%);
-  transition:left .09s,top .09s;
+  transition:left .09s linear,top .09s linear,width .18s ease,height .18s ease,opacity .18s ease,border-color .18s ease;
+}
+/* ring collapses to dot size on hover — visually merges with the grown dot */
+#cursor-ring.grow{
+  width:10px;height:10px;
+  opacity:0;
+  border-color:transparent;
 }
 
 /* ─── GRID BG ────────────────────────────────────────── */
@@ -880,8 +902,6 @@ footer{
 
 /* ─── RESPONSIVE ─────────────────────────────────────── */
 @media(max-width:1024px){
-  .hero-video-wrapper{display:none;}
-  .hero-video-overlay{display:none;}
   .hero{grid-template-columns:1fr;padding:100px 28px 60px;}
   .hero-right{display:none;}
   .section{padding:64px 28px;}
@@ -894,8 +914,6 @@ footer{
   footer{flex-direction:column;gap:14px;text-align:center;padding:28px 24px;}
 }
 @media(max-width:768px){
-  .hero-video-wrapper{display:none;}
-  .hero-video-overlay{display:none;}
   /* Hide desktop-only chrome */
   #cursor,#cursor-ring{display:none !important;}
   body{cursor:auto !important;}
@@ -1394,16 +1412,14 @@ footer{
 
   <!-- STEP INDICATOR -->
   <div class="step-indicator reveal" id="step-indicator">
-    <div class="step-pill active" data-step="1"><span class="step-pill-num">1</span> Your Project</div>
+    <div class="step-pill active" data-step="1"><span class="step-pill-num">1</span> Book for Discussion</div>
     <div class="step-line"></div>
-    <div class="step-pill" data-step="2"><span class="step-pill-num">2</span> Pick a Time</div>
-    <div class="step-line"></div>
-    <div class="step-pill" data-step="3"><span class="step-pill-num">3</span> Confirm</div>
+    <div class="step-pill" data-step="2"><span class="step-pill-num">2</span> Confirm</div>
   </div>
 
   <!-- STEP 1: FORM -->
   <div class="cal-section reveal" id="step-1-section">
-    <form id="booking-form" onsubmit="goToStep2(event)">
+    <form id="booking-form" onsubmit="submitDiscussion(event)">
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Your name *</label>
@@ -1418,70 +1434,18 @@ footer{
         <label class="form-label">What do you want to automate? *</label>
         <textarea name="message" id="f-message" class="form-textarea" rows="4" placeholder="Describe the manual process — what happens now, how long it takes, who does it..." required></textarea>
       </div>
-      <div class="form-group" style="margin-top:14px;">
-        <label class="form-label">Budget range</label>
-        <select name="budget" id="f-budget" class="form-select">
-          <option value="">Select a range</option>
-          <option>₹15K – ₹40K (small tool)</option>
-          <option>₹40K – ₹1L (medium project)</option>
-          <option>₹1L – ₹2.5L (full platform)</option>
-          <option>₹50K+/month (retainer)</option>
-          <option>Advisory / consulting only</option>
-        </select>
-      </div>
-      <button type="submit" class="form-submit" style="margin-top:18px;">Continue to pick a time →</button>
+      <button type="submit" class="form-submit" style="margin-top:18px;">Book for Discussion →</button>
     </form>
   </div>
 
-  <!-- STEP 2: CALENDAR -->
-  <div class="cal-section reveal" id="step-2-section" style="display:none;">
-    <div style="display:flex;align-items:flex-start;gap:48px;flex-wrap:wrap;">
-      <div style="flex:1.2;min-width:280px;">
-        <div style="font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:10px;">Step 1 — Pick a date</div>
-        <div class="cal-header">
-          <div class="cal-month-label" id="cal-month-label">May 2026</div>
-          <div class="cal-nav">
-            <button class="cal-nav-btn" onclick="calNav(-1)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            </button>
-            <button class="cal-nav-btn" onclick="calNav(1)">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="cal-weekdays">
-          <div class="cal-weekday">Sun</div><div class="cal-weekday">Mon</div>
-          <div class="cal-weekday">Tue</div><div class="cal-weekday">Wed</div>
-          <div class="cal-weekday">Thu</div><div class="cal-weekday">Fri</div>
-          <div class="cal-weekday">Sat</div>
-        </div>
-        <div class="cal-days" id="cal-days"></div>
-      </div>
-      <div style="flex:1;min-width:220px;padding-top:36px;">
-        <div style="font-family:var(--font-mono);font-size:10.5px;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:14px;">Step 2 — Pick a time (IST)</div>
-        <div id="cal-slots-wrap" style="color:var(--text-3);font-size:13px;font-family:var(--font-mono);padding:12px 0;">← Select a date first</div>
-      </div>
-    </div>
-
-    <div class="cal-confirm" id="cal-confirm" style="display:none;">
-      <div class="cal-confirm-text">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px;color:var(--accent-lt)"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <strong id="cal-confirm-label">—</strong>
-        <span style="color:var(--text-3);margin-left:8px;">30 min · Discovery call · Google Meet</span>
-      </div>
-      <button class="cal-confirm-btn" onclick="submitBooking()">Confirm & send →</button>
-    </div>
-    <button type="button" onclick="goToStep1()" style="margin-top:14px;background:transparent;border:none;color:var(--text-3);font-family:var(--font-mono);font-size:11px;cursor:none;">← Back to your project details</button>
-  </div>
-
-  <!-- STEP 3: SUCCESS -->
-  <div class="cal-section reveal" id="step-3-section" style="display:none;text-align:center;">
+  <!-- STEP 2: SUCCESS -->
+  <div class="cal-section reveal" id="step-2-section" style="display:none;text-align:center;">
     <div style="display:flex;justify-content:center;margin-bottom:16px;">
       <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="20 6 9 17 4 12"/></svg>
     </div>
-    <h3 style="font-family:var(--font-serif);font-size:36px;font-weight:400;font-style:italic;color:var(--text);margin-bottom:8px;letter-spacing:-0.02em;">You're booked.</h3>
-    <p id="success-detail" style="font-family:var(--font-mono);font-size:13px;color:var(--accent-lt);margin-bottom:16px;">—</p>
-    <p style="font-size:14.5px;color:var(--text-2);max-width:480px;margin:0 auto 24px;line-height:1.7;">Calendar invite landing in your inbox. I'll WhatsApp you 30 min before. In the meantime, you can also book directly on my Calendly:</p>
+    <h3 style="font-family:var(--font-serif);font-size:36px;font-weight:400;font-style:italic;color:var(--text);margin-bottom:8px;letter-spacing:-0.02em;">Request received.</h3>
+    <p id="success-detail" style="font-family:var(--font-mono);font-size:13px;color:var(--accent-lt);margin-bottom:16px;">I'll respond within 24 hours.</p>
+    <p style="font-size:14.5px;color:var(--text-2);max-width:480px;margin:0 auto 24px;line-height:1.7;">Your project details are in my inbox. I'll reply with a 30-min discovery call slot. Or you can pick a time directly:</p>
     <a href="https://calendly.com/avaduthabhanuprakash1/30min" target="_blank" class="btn-primary" style="display:inline-flex;">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Open Calendly
@@ -1852,8 +1816,17 @@ function animRing() {
 }
 animRing();
 document.querySelectorAll('a,button,.case-card,.service-card,.problem-card,.stack-item,.metric-chip,.contact-link').forEach(el => {
-  el.addEventListener('mouseenter', () => cursor.classList.add('grow'));
-  el.addEventListener('mouseleave', () => cursor.classList.remove('grow'));
+  el.addEventListener('mouseenter', () => {
+    /* snap ring to cursor so merge transition starts from same point */
+    rx = mx; ry = my;
+    ring.style.left=mx+'px'; ring.style.top=my+'px';
+    cursor.classList.add('grow');
+    ring.classList.add('grow');
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.classList.remove('grow');
+    ring.classList.remove('grow');
+  });
 });
 
 /* ─── NAV SCROLL ───────────────────────────────────── */
@@ -1906,92 +1879,6 @@ const countObs = new IntersectionObserver(entries => {
 }, { threshold: 0.5 });
 document.querySelectorAll('[data-count]').forEach(el => countObs.observe(el));
 
-/* ─── CALENDAR ─────────────────────────────────────────── */
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const SLOTS = ['09:00 AM','09:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','12:00 PM','02:00 PM','02:30 PM','03:00 PM','03:30 PM','04:00 PM','04:30 PM','05:00 PM'];
-const BOOKED = { 2:['09:00 AM','10:00 AM'], 5:['11:00 AM'], 8:['09:30 AM','02:00 PM','04:00 PM'], 12:['10:30 AM'], 15:['09:00 AM','09:30 AM','10:00 AM'], 19:['03:00 PM'], 22:['11:30 AM','02:30 PM'] };
-
-let calYear = 2026, calMonth = 4; // May 2026 (0-indexed)
-let selDay = null, selSlot = null;
-
-function renderCal() {
-  const now = new Date();
-  const label = document.getElementById('cal-month-label');
-  label.textContent = MONTHS[calMonth] + ' ' + calYear;
-
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
-  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
-
-  let html = '';
-  for (let i = firstDay-1; i >= 0; i--) {
-    html += `<div class="cal-day other-month">${daysInPrev-i}</div>`;
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const date = new Date(calYear, calMonth, d);
-    const isToday = date.toDateString() === now.toDateString();
-    const isPast = date < new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-    const isSelected = selDay === d && calMonth === calMonth;
-    let cls = 'cal-day';
-    if (isPast) cls += ' past';
-    else if (isWeekend) cls += ' weekend';
-    else cls += ' available';
-    if (isToday) cls += ' today';
-    if (isSelected) cls += ' selected';
-    html += `<div class="${cls}" onclick="${isPast||isWeekend?'':`selectDay(${d})`}">${d}</div>`;
-  }
-  const total = firstDay + daysInMonth;
-  const rem = total % 7 === 0 ? 0 : 7 - (total % 7);
-  for (let i = 1; i <= rem; i++) {
-    html += `<div class="cal-day other-month">${i}</div>`;
-  }
-  document.getElementById('cal-days').innerHTML = html;
-}
-
-function calNav(dir) {
-  calMonth += dir;
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  if (calMonth < 0) { calMonth = 11; calYear--; }
-  selDay = null; selSlot = null;
-  document.getElementById('cal-confirm').style.display = 'none';
-  document.getElementById('cal-slots-wrap').innerHTML = '<span style="color:var(--text-3);font-size:13px;font-family:var(--font-mono);">← Select a date first</span>';
-  renderCal();
-}
-
-function selectDay(d) {
-  selDay = d; selSlot = null;
-  document.getElementById('cal-confirm').style.display = 'none';
-  renderCal();
-  renderSlots(d);
-}
-
-function renderSlots(d) {
-  const booked = BOOKED[d] || [];
-  const wrap = document.getElementById('cal-slots-wrap');
-  wrap.innerHTML = '<div class="cal-slots">' +
-    SLOTS.map(s => {
-      const isBooked = booked.includes(s);
-      return `<div class="cal-slot${isBooked?' booked':''}" onclick="${isBooked?'':'selectSlot(\''+s+'\')'}">
-        ${s}${isBooked?' <span style="font-size:9px;opacity:.5;">taken</span>':''}
-      </div>`;
-    }).join('') +
-  '</div>';
-}
-
-function selectSlot(slot) {
-  selSlot = slot;
-  document.querySelectorAll('.cal-slot').forEach(el => {
-    el.classList.toggle('selected', el.textContent.trim().startsWith(slot));
-  });
-  const d = selDay;
-  const dateStr = MONTHS[calMonth] + ' ' + d + ', ' + calYear;
-  document.getElementById('cal-confirm-label').textContent = dateStr + ' at ' + slot + ' IST';
-  document.getElementById('cal-confirm').style.display = 'flex';
-}
-
-renderCal();
-
 /* ─── BOOKING FLOW: STEP NAVIGATION ──────────────── */
 let bookingData = {};
 
@@ -2003,44 +1890,32 @@ function setStep(n) {
   });
   document.getElementById('step-1-section').style.display = n === 1 ? 'block' : 'none';
   document.getElementById('step-2-section').style.display = n === 2 ? 'block' : 'none';
-  document.getElementById('step-3-section').style.display = n === 3 ? 'block' : 'none';
   const top = document.getElementById('contact').getBoundingClientRect().top + window.scrollY - 60;
   window.scrollTo({ top, behavior: 'smooth' });
 }
 
-function goToStep1() { setStep(1); }
-
-function goToStep2(e) {
+async function submitDiscussion(e) {
   e.preventDefault();
   bookingData = {
     name: document.getElementById('f-name').value.trim(),
     email: document.getElementById('f-email').value.trim(),
     message: document.getElementById('f-message').value.trim(),
-    budget: document.getElementById('f-budget').value,
   };
   if (!bookingData.name || !bookingData.email || !bookingData.message) return;
-  setStep(2);
-}
 
-async function submitBooking() {
-  const dateStr = MONTHS[calMonth] + ' ' + selDay + ', ' + calYear;
-  const slotStr = selSlot + ' IST';
-  const btn = document.querySelector('#cal-confirm .cal-confirm-btn');
+  const btn = e.target.querySelector('button[type="submit"]');
+  const originalText = btn.textContent;
   btn.textContent = 'Sending...';
   btn.disabled = true;
 
   const payload = new FormData();
   payload.append('access_key', 'b9077aa0-c95a-4589-ad1c-6b585dbec922');
-  payload.append('subject', 'New booking from portfolio: ' + bookingData.name);
+  payload.append('subject', 'New discussion request from portfolio: ' + bookingData.name);
   payload.append('from_name', 'Bhanu Portfolio');
   payload.append('name', bookingData.name);
   payload.append('email', bookingData.email);
-  payload.append('budget', bookingData.budget || 'Not specified');
-  payload.append('preferred_slot', dateStr + ' at ' + slotStr);
   payload.append('message',
     'AUTOMATION REQUEST:\n' + bookingData.message +
-    '\n\nBudget: ' + (bookingData.budget || 'Not specified') +
-    '\n\nPreferred meeting slot: ' + dateStr + ' at ' + slotStr +
     '\n\n— Submitted via portfolio booking flow.'
   );
 
@@ -2053,9 +1928,11 @@ async function submitBooking() {
     console.warn('Web3Forms submit failed', err);
   }
 
+  btn.textContent = originalText;
+  btn.disabled = false;
   document.getElementById('success-detail').textContent =
-    dateStr + ' · ' + slotStr + ' · 30-min Discovery Call';
-  setStep(3);
+    "Hi " + bookingData.name + " — I'll respond within 24 hours.";
+  setStep(2);
 }
 </script>
 </body>
